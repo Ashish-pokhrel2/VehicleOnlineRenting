@@ -16,7 +16,7 @@ class NepaliPhoneNumber implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Validate Nepali phone number format: +977[10 digits]
-        if (!preg_match('/^\+977\d{10}$/', $value)) {
+        if (! preg_match('/^\+977\d{10}$/', $value)) {
             $fail('The :attribute must be a valid Nepali phone number in the format +977XXXXXXXXXX (10 digits after +977).');
         }
     }

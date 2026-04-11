@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Rules\InternationalPhoneNumber;
+use App\Services\PhoneValidationService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -33,7 +32,7 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $countryCode = $request->input('country_code', 'NP');
-        
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
@@ -48,7 +47,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // Combine country prefix with digits to create full phone number
-        $fullPhoneNumber = \App\Services\PhoneValidationService::formatPhoneNumber(
+        $fullPhoneNumber = PhoneValidationService::formatPhoneNumber(
             $countryCode,
             $request->phone_digits
         );

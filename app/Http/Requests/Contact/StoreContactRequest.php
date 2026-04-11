@@ -1,29 +1,28 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Contact;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreContactRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check();
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'min:20'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'message.min' => 'The message must be at least 20 characters.',
         ];
     }
 }

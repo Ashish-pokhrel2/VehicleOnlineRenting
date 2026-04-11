@@ -2,65 +2,98 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreContactRequest;
-use App\Http\Requests\UpdateContactRequest;
+use App\Enums\ContactStatus;
+use App\Http\Requests\Contact\StoreContactRequest;
 use App\Models\Contact;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        //
+        $query = Contact::with('user:id,name,email')
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->when($request->unread_only, fn ($q) => $q->unread())
+            ->latest();
+
+        $contacts = $request->paginate
+            ? $query->paginate($request->per_page ?? 15)
+            : $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $contacts,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreContactRequest $request): JsonResponse
     {
-        //
+        $contact = Contact::create([
+            'user_id' => auth()->id(),
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'status' => ContactStatus::PENDING,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact message sent successfully',
+            'data' => $contact->load('user:id,name,email'),
+        ], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreContactRequest $request)
+    public function show(Contact $contact): JsonResponse
     {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $contact->load('user:id,name,email'),
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Contact $contact)
+    public function markAsRead(Contact $contact): JsonResponse
     {
-        //
+        $contact->update(['is_read' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact marked as read',
+            'data' => $contact,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Contact $contact)
+    public function updateStatus(Request $request, Contact $contact): JsonResponse
     {
-        //
+        $request->validate([
+            'status' => ['required', 'in:Replied,Closed'],
+        ]);
+
+        $contact->update([
+            'status' => $request->status,
+            'is_read' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact status updated successfully',
+            'data' => $contact->load('user:id,name,email'),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateContactRequest $request, Contact $contact)
+    public function destroy(Contact $contact): JsonResponse
     {
-        //
-    }
+        if ($contact->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to delete this contact',
+            ], 403);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Contact $contact)
-    {
-        //
+        $contact->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact deleted successfully',
+        ]);
     }
 }
