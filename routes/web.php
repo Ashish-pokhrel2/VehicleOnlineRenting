@@ -21,10 +21,10 @@ Route::get('/vehicles', function () {
     return view('vehicles.index');
 })->name('vehicles.index');
 
-// (Optional) Contact Page - Uncomment when you create the contact view
-// Route::get('/contact', function () {
-//     return view('contact');
-// })->name('contact');
+// My Bookings Page
+Route::get('/my-bookings', function () {
+    return view('bookings.index');
+})->name('bookings.index');
 
 
 // ===================== Authenticated Routes =====================

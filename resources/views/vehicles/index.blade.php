@@ -19,7 +19,7 @@
             <a href="{{ route('home') }}">Home</a>
             <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
             <a href="#">Vendors</a>
-            <a href="#">My Bookings</a>
+            <a href="{{ route('bookings.index') }}">My Bookings</a>
         </nav>
 
         <div class="vehicles-nav-right">

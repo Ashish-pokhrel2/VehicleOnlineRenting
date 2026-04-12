@@ -11,16 +11,16 @@
     <!-- ===================== NAVBAR ===================== -->
     <header class="navbar">
         <div class="nav-left">
-            <a href="{{ url('/') }}">
+            <a href="{{ route('home') }}">
                 <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="brand-logo">
             </a>
         </div>
 
         <nav class="nav-center">
-            <a href="{{ url('/') }}" class="active">Home</a>
+            <a href="{{ route('home') }}" class="active">Home</a>
             <a href="{{ route('vehicles.index') }}">Vehicles</a>
             <a href="#">Vendors</a>
-            <a href="#">My Bookings</a>
+            <a href="{{ route('bookings.index') }}">My Bookings</a>
         </nav>
 
         <div class="nav-right">
@@ -234,9 +234,10 @@
 
             <div>
                 <h4>Quick Links</h4>
-                <a href="{{ url('/') }}">Home</a>
+                <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('vehicles.index') }}">Vehicles</a>
                 <a href="{{ route('login') }}">Login</a>
+                <a href="{{ route('bookings.index') }}">My Bookings</a>
             </div>
 
             <div>
