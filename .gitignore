@@ -22,3 +22,18 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel Boost (agentic development files)
+boost.json
+.copilot/
+.claude/
+.github/
+AGENTS.md
+CLAUDE.md
+*.agent.md
+*.instructions.md
+copilot-instructions.md
+.mcp.json
+composer.lock
+composer.json
+tests/Feature/API

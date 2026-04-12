@@ -41,7 +41,7 @@ class PhoneValidationService
      */
     public static function validate(string $phone, string $countryCode): bool
     {
-        if (!isset(self::$countryFormats[$countryCode])) {
+        if (! isset(self::$countryFormats[$countryCode])) {
             return false;
         }
 
@@ -82,6 +82,7 @@ class PhoneValidationService
                 return $code;
             }
         }
+
         return null;
     }
 
@@ -91,11 +92,11 @@ class PhoneValidationService
     public static function formatPhoneNumber(string $countryCode, string $digits): string
     {
         $format = self::getCountryFormat($countryCode);
-        if (!$format) {
+        if (! $format) {
             return $digits;
         }
-        
-        return $format['prefix'] . $digits;
+
+        return $format['prefix'].$digits;
     }
 
     /**
@@ -104,10 +105,10 @@ class PhoneValidationService
     public static function validateDigits(string $digits, string $countryCode): bool
     {
         $format = self::getCountryFormat($countryCode);
-        if (!$format) {
+        if (! $format) {
             return false;
         }
-        
-        return preg_match('/^\d{' . $format['digits'] . '}$/', $digits) === 1;
+
+        return preg_match('/^\d{'.$format['digits'].'}$/', $digits) === 1;
     }
 }

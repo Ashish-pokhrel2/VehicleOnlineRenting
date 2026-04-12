@@ -27,13 +27,14 @@ class InternationalPhoneNumber implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $format = PhoneValidationService::getCountryFormat($this->countryCode);
-        
-        if (!$format) {
+
+        if (! $format) {
             $fail("The country code {$this->countryCode} is not supported.");
+
             return;
         }
 
-        if (!PhoneValidationService::validate($value, $this->countryCode)) {
+        if (! PhoneValidationService::validate($value, $this->countryCode)) {
             $fail("The :attribute must be a valid phone number for {$format['description']}. Example: {$format['example']}");
         }
     }

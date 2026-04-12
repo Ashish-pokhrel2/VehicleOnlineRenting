@@ -18,7 +18,7 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         $countryCode = $this->user()->country_code ?? 'NP';
-        
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
