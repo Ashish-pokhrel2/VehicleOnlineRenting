@@ -8,29 +8,44 @@
 </head>
 <body class="home-body">
 
+    <!-- ===================== NAVBAR ===================== -->
     <header class="navbar">
         <div class="nav-left">
-            <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="brand-logo">
+            <a href="{{ url('/') }}">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="brand-logo">
+            </a>
         </div>
 
         <nav class="nav-center">
-            <a href="/" class="active">Home</a>
-            <a href="/vehicles">Vehicles</a>
+            <a href="{{ url('/') }}" class="active">Home</a>
+            <a href="{{ route('vehicles.index') }}">Vehicles</a>
             <a href="#">Vendors</a>
-            <a href="/my-bookings">My Bookings</a>
+            <a href="#">My Bookings</a>
         </nav>
 
         <div class="nav-right">
-            <a href="/login" class="login-link">Login</a>
-            <a href="/register" class="signup-btn">Sign Up</a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="login-link">Dashboard</a>
+                <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="signup-btn">Logout</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="login-link">Login</a>
+                <a href="{{ route('register') }}" class="signup-btn">Sign Up</a>
+            @endauth
         </div>
     </header>
 
+    <!-- ===================== HERO SECTION ===================== -->
     <section class="hero">
         <div class="hero-overlay">
             <div class="hero-content">
                 <h1>Find Your Perfect Ride</h1>
-                <p>Rent premium vehicles at the best prices. Easy booking,<br>flexible options.</p>
+                <p>
+                    Rent premium vehicles at the best prices. Easy booking,
+                    <br>flexible options.
+                </p>
 
                 <div class="search-box">
                     <div class="search-item">
@@ -54,6 +69,7 @@
         </div>
     </section>
 
+    <!-- ===================== CATEGORY SECTION ===================== -->
     <section class="section white-section">
         <h2>Browse by Category</h2>
         <p class="section-subtitle">Choose from our wide range of vehicles</p>
@@ -73,11 +89,13 @@
         </div>
     </section>
 
+    <!-- ===================== FEATURED VEHICLES ===================== -->
     <section class="section light-section">
         <h2>Featured Vehicles</h2>
         <p class="section-subtitle">Popular choices from our collection</p>
 
         <div class="vehicles-grid">
+            <!-- Mercedes -->
             <div class="vehicle-card">
                 <div class="vehicle-image-wrapper">
                     <img src="{{ asset('images/vehicles/car1.jpg') }}" alt="Mercedes S-Class">
@@ -99,11 +117,12 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$150<span>/day</span></div>
-                        <a href="#">View Details →</a>
+                        <a href="{{ route('vehicles.index') }}">View Details →</a>
                     </div>
                 </div>
             </div>
 
+            <!-- Porsche -->
             <div class="vehicle-card">
                 <div class="vehicle-image-wrapper">
                     <img src="{{ asset('images/vehicles/car2.jpg') }}" alt="Porsche 911">
@@ -125,11 +144,12 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$300<span>/day</span></div>
-                        <a href="#">View Details →</a>
+                        <a href="{{ route('vehicles.index') }}">View Details →</a>
                     </div>
                 </div>
             </div>
 
+            <!-- Range Rover -->
             <div class="vehicle-card">
                 <div class="vehicle-image-wrapper">
                     <img src="{{ asset('images/vehicles/car3.jpg') }}" alt="Range Rover Sport">
@@ -151,92 +171,20 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$180<span>/day</span></div>
-                        <a href="#">View Details →</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/bike1.jpg') }}" alt="Harley Davidson">
-                    <span class="vehicle-tag">Cruiser</span>
-                </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Harley Davidson</h3>
-                            <p>Elite Motors</p>
-                        </div>
-                        <span class="rating">⭐ 4.7</span>
-                    </div>
-                    <small>67 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>⚙️ Manual</span>
-                        <span>⛽ Gasoline</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$80<span>/day</span></div>
-                        <a href="#">View Details →</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/scooter.jpg') }}" alt="Electric Scooter">
-                    <span class="vehicle-tag">Electric</span>
-                </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Electric Scooter</h3>
-                            <p>Urban Mobility</p>
-                        </div>
-                        <span class="rating">⭐ 4.5</span>
-                    </div>
-                    <small>234 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>🔋 Electric</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$25<span>/day</span></div>
-                        <a href="#">View Details →</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/car4.jpg') }}" alt="Honda Accord">
-                    <span class="vehicle-tag">Sedan</span>
-                </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Honda Accord</h3>
-                            <p>Urban Mobility</p>
-                        </div>
-                        <span class="rating">⭐ 4.6</span>
-                    </div>
-                    <small>198 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>👥 5</span>
-                        <span>⚙️ Automatic</span>
-                        <span>⛽ Gasoline</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$60<span>/day</span></div>
-                        <a href="#">View Details →</a>
+                        <a href="{{ route('vehicles.index') }}">View Details →</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="center-btn">
-            <button class="dark-btn">View All Vehicles</button>
+            <a href="{{ route('vehicles.index') }}">
+                <button class="dark-btn">View All Vehicles</button>
+            </a>
         </div>
     </section>
 
+    <!-- ===================== WHY CHOOSE US ===================== -->
     <section class="section white-section">
         <h2>Why Choose Us</h2>
         <p class="section-subtitle">We make vehicle rental simple and hassle-free</p>
@@ -262,12 +210,16 @@
         </div>
     </section>
 
+    <!-- ===================== CTA SECTION ===================== -->
     <section class="cta-section">
         <h2>Ready to Hit the Road?</h2>
         <p>Join thousands of satisfied customers and book your perfect vehicle today</p>
-        <button class="rent-btn">Rent Now</button>
+        <a href="{{ route('vehicles.index') }}">
+            <button class="rent-btn">Rent Now</button>
+        </a>
     </section>
 
+    <!-- ===================== FOOTER ===================== -->
     <footer class="footer">
         <div class="footer-grid">
             <div>
@@ -282,15 +234,15 @@
 
             <div>
                 <h4>Quick Links</h4>
-                <a href="/">Home</a>
-                <a href="/vehicles">Vehicles</a>
-                <a href="/login">Login</a>
+                <a href="{{ url('/') }}">Home</a>
+                <a href="{{ route('vehicles.index') }}">Vehicles</a>
+                <a href="{{ route('login') }}">Login</a>
             </div>
 
             <div>
                 <h4>Support</h4>
                 <a href="#">Help Center</a>
-                <a href="/contact">Contact Us</a>
+                <a href="#">Contact Us</a>
                 <a href="#">FAQs</a>
             </div>
 
@@ -303,7 +255,7 @@
         </div>
 
         <div class="footer-bottom">
-            © 2026 VehicleRent. All rights reserved.
+            © {{ date('Y') }} VehicleRent. All rights reserved.
         </div>
     </footer>
 
