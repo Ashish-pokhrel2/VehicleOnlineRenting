@@ -48,17 +48,14 @@
 
                 <div class="search-box">
                     <div class="search-item">
-                        <span class="search-emoji"></span>
                         <input type="text" placeholder="Location">
                     </div>
 
                     <div class="search-item">
-                        <span class="search-emoji"></span>
                         <input type="text" placeholder="mm/dd/year">
                     </div>
 
                     <div class="search-item">
-                        <span class="search-emoji"></span>
                         <input type="text" placeholder="Vehicles Type">
                     </div>
 
@@ -106,13 +103,13 @@
                             <h3>Mercedes S-Class</h3>
                             <p>Premium Rentals</p>
                         </div>
-                        <span class="rating"> 4.9</span>
+                        <span class="rating">4.9</span>
                     </div>
                     <small>156 reviews</small>
                     <div class="vehicle-meta">
-                        <span> 5</span>
-                        <span> Automatic</span>
-                        <span> Hybrid</span>
+                        <span>5</span>
+                        <span>Automatic</span>
+                        <span>Hybrid</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$150<span>/day</span></div>
@@ -133,13 +130,13 @@
                             <h3>Porsche 911</h3>
                             <p>Premium Rentals</p>
                         </div>
-                        <span class="rating"> 5</span>
+                        <span class="rating">5</span>
                     </div>
                     <small>89 reviews</small>
                     <div class="vehicle-meta">
-                        <span> 2</span>
-                        <span> Manual</span>
-                        <span> Gasoline</span>
+                        <span>2</span>
+                        <span>Manual</span>
+                        <span>Gasoline</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$300<span>/day</span></div>
@@ -160,13 +157,13 @@
                             <h3>Range Rover Sport</h3>
                             <p>Elite Motors</p>
                         </div>
-                        <span class="rating"> 4.8</span>
+                        <span class="rating">4.8</span>
                     </div>
                     <small>124 reviews</small>
                     <div class="vehicle-meta">
-                        <span> 7</span>
-                        <span> Automatic</span>
-                        <span> Diesel</span>
+                        <span>7</span>
+                        <span>Automatic</span>
+                        <span>Diesel</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$180<span>/day</span></div>
