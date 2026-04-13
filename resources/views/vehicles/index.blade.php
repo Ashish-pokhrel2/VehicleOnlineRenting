@@ -9,24 +9,25 @@
 <body class="home-body">
 
     <header class="vehicles-navbar">
-        <div class="vehicles-nav-left">
-            <a href="{{ route('home') }}">
-                <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
-            </a>
-        </div>
+    <div class="vehicles-nav-left">
+        <a href="{{ route('home') }}" class="vehicles-brand-link">
+            <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
+            <span class="vehicles-brand-text">VehicleRent</span>
+        </a>
+    </div>
 
-        <nav class="vehicles-nav-center">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
-            <a href="#">Vendors</a>
-            <a href="{{ route('bookings.index') }}">My Bookings</a>
-        </nav>
+    <nav class="vehicles-nav-center">
+        <a href="{{ route('home') }}">Home</a>
+        <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
+        <a href="#">Vendors</a>
+        <a href="{{ route('user.bookings') }}">My Bookings</a>
+    </nav>
 
-        <div class="vehicles-nav-right">
-            <span class="customer-pill">👤 Customer</span>
-            <a href="#" class="logout-link">↪ Logout</a>
-        </div>
-    </header>
+    <div class="vehicles-nav-right">
+        <span class="customer-pill">Customer</span>
+        <a href="#" class="logout-link">Logout</a>
+    </div>
+</header>
 
     <main class="vehicles-page-wrapper">
         <section class="vehicles-page-header">
@@ -89,13 +90,13 @@
                                 <h3>Mercedes S-Class</h3>
                                 <p>Premium Rentals</p>
                             </div>
-                            <span class="rating">⭐ 4.9</span>
+                            <span class="rating">4.9</span>
                         </div>
                         <small>156 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 5</span>
-                            <span>⚙️ Automatic</span>
-                            <span>⛽ Hybrid</span>
+                            <span>5</span>
+                            <span>Automatic</span>
+                            <span>Hybrid</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$150<span>/day</span></div>
@@ -115,13 +116,13 @@
                                 <h3>Porsche 911</h3>
                                 <p>Premium Rentals</p>
                             </div>
-                            <span class="rating">⭐ 5</span>
+                            <span class="rating">5</span>
                         </div>
                         <small>89 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 2</span>
-                            <span>⚙️ Manual</span>
-                            <span>⛽ Gasoline</span>
+                            <span>2</span>
+                            <span>Manual</span>
+                            <span>Gasoline</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$300<span>/day</span></div>
@@ -141,13 +142,13 @@
                                 <h3>Range Rover Sport</h3>
                                 <p>Elite Motors</p>
                             </div>
-                            <span class="rating">⭐ 4.8</span>
+                            <span class="rating">4.8</span>
                         </div>
                         <small>124 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 7</span>
-                            <span>⚙️ Automatic</span>
-                            <span>⛽ Diesel</span>
+                            <span>7</span>
+                            <span>Automatic</span>
+                            <span>Diesel</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$180<span>/day</span></div>
@@ -167,12 +168,12 @@
                                 <h3>Harley Davidson</h3>
                                 <p>Elite Motors</p>
                             </div>
-                            <span class="rating">⭐ 4.7</span>
+                            <span class="rating">4.7</span>
                         </div>
                         <small>67 reviews</small>
                         <div class="vehicle-meta">
-                            <span>⚙️ Manual</span>
-                            <span>⛽ Gasoline</span>
+                            <span>Manual</span>
+                            <span>Gasoline</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$80<span>/day</span></div>
@@ -192,11 +193,11 @@
                                 <h3>Electric Scooter</h3>
                                 <p>Urban Mobility</p>
                             </div>
-                            <span class="rating">⭐ 4.5</span>
+                            <span class="rating">4.5</span>
                         </div>
                         <small>234 reviews</small>
                         <div class="vehicle-meta">
-                            <span>🔋 Electric</span>
+                            <span>Electric</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$25<span>/day</span></div>
@@ -216,13 +217,13 @@
                                 <h3>Honda Accord</h3>
                                 <p>Urban Mobility</p>
                             </div>
-                            <span class="rating">⭐ 4.6</span>
+                            <span class="rating">4.6</span>
                         </div>
                         <small>198 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 5</span>
-                            <span>⚙️ Automatic</span>
-                            <span>⛽ Gasoline</span>
+                            <span>5</span>
+                            <span>Automatic</span>
+                            <span>Gasoline</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$60<span>/day</span></div>
@@ -242,13 +243,13 @@
                                 <h3>BMW Convertible</h3>
                                 <p>Premium Rentals</p>
                             </div>
-                            <span class="rating">⭐ 4.9</span>
+                            <span class="rating">4.9</span>
                         </div>
                         <small>92 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 4</span>
-                            <span>⚙️ Automatic</span>
-                            <span>⛽ Gasoline</span>
+                            <span>4</span>
+                            <span>Automatic</span>
+                            <span>Gasoline</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$220<span>/day</span></div>
@@ -268,13 +269,13 @@
                                 <h3>Family Van</h3>
                                 <p>Elite Motors</p>
                             </div>
-                            <span class="rating">⭐ 4.7</span>
+                            <span class="rating">4.7</span>
                         </div>
                         <small>145 reviews</small>
                         <div class="vehicle-meta">
-                            <span>👥 8</span>
-                            <span>⚙️ Automatic</span>
-                            <span>⛽ Diesel</span>
+                            <span>8</span>
+                            <span>Automatic</span>
+                            <span>Diesel</span>
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$90<span>/day</span></div>

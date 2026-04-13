@@ -20,7 +20,7 @@
             <a href="{{ route('home') }}" class="active">Home</a>
             <a href="{{ route('vehicles.index') }}">Vehicles</a>
             <a href="#">Vendors</a>
-            <a href="{{ route('bookings.index') }}">My Bookings</a>
+            <a href="{{ route('user.bookings') }}">My Bookings</a>
         </nav>
 
         <div class="nav-right">
@@ -49,17 +49,17 @@
 
                 <div class="search-box">
                     <div class="search-item">
-                        <span class="search-emoji">📍</span>
+                        <span class="search-emoji"></span>
                         <input type="text" placeholder="Location">
                     </div>
 
                     <div class="search-item">
-                        <span class="search-emoji">📅</span>
+                        <span class="search-emoji"></span>
                         <input type="text" placeholder="mm/dd/year">
                     </div>
 
                     <div class="search-item">
-                        <span class="search-emoji">🚗</span>
+                        <span class="search-emoji"></span>
                         <input type="text" placeholder="Vehicles Type">
                     </div>
 
@@ -76,13 +76,13 @@
 
         <div class="category-grid">
             <div class="category-card">
-                <div class="category-icon">🚗</div>
+                <div class="category-icon"></div>
                 <h3>Cars</h3>
                 <p>5 vehicles available</p>
             </div>
 
             <div class="category-card">
-                <div class="category-icon">🏍️</div>
+                <div class="category-icon"></div>
                 <h3>Bikes</h3>
                 <p>1 vehicles available</p>
             </div>
@@ -107,13 +107,13 @@
                             <h3>Mercedes S-Class</h3>
                             <p>Premium Rentals</p>
                         </div>
-                        <span class="rating">⭐ 4.9</span>
+                        <span class="rating"> 4.9</span>
                     </div>
                     <small>156 reviews</small>
                     <div class="vehicle-meta">
-                        <span>👥 5</span>
-                        <span>⚙️ Automatic</span>
-                        <span>⛽ Hybrid</span>
+                        <span> 5</span>
+                        <span> Automatic</span>
+                        <span> Hybrid</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$150<span>/day</span></div>
@@ -134,13 +134,13 @@
                             <h3>Porsche 911</h3>
                             <p>Premium Rentals</p>
                         </div>
-                        <span class="rating">⭐ 5</span>
+                        <span class="rating"> 5</span>
                     </div>
                     <small>89 reviews</small>
                     <div class="vehicle-meta">
-                        <span>👥 2</span>
-                        <span>⚙️ Manual</span>
-                        <span>⛽ Gasoline</span>
+                        <span> 2</span>
+                        <span> Manual</span>
+                        <span> Gasoline</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$300<span>/day</span></div>
@@ -161,13 +161,13 @@
                             <h3>Range Rover Sport</h3>
                             <p>Elite Motors</p>
                         </div>
-                        <span class="rating">⭐ 4.8</span>
+                        <span class="rating"> 4.8</span>
                     </div>
                     <small>124 reviews</small>
                     <div class="vehicle-meta">
-                        <span>👥 7</span>
-                        <span>⚙️ Automatic</span>
-                        <span>⛽ Diesel</span>
+                        <span> 7</span>
+                        <span> Automatic</span>
+                        <span> Diesel</span>
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$180<span>/day</span></div>
@@ -191,19 +191,19 @@
 
         <div class="why-grid">
             <div class="why-card">
-                <div class="why-icon">🛡️</div>
+                <div class="why-icon"></div>
                 <h3>Safe & Secure</h3>
                 <p>All vehicles are fully insured and regularly maintained</p>
             </div>
 
             <div class="why-card">
-                <div class="why-icon">🕒</div>
+                <div class="why-icon"></div>
                 <h3>24/7 Support</h3>
                 <p>Our customer support team is always here to help</p>
             </div>
 
             <div class="why-card">
-                <div class="why-icon">⭐</div>
+                <div class="why-icon"></div>
                 <h3>Best Rates</h3>
                 <p>Competitive pricing with no hidden fees</p>
             </div>

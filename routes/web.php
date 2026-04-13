@@ -24,7 +24,7 @@ Route::get('/vehicles', function () {
 // My Bookings Page
 Route::get('/my-bookings', function () {
     return view('bookings.index');
-})->name('bookings.index');
+})->name('user.bookings');
 
 
 // ===================== Authenticated Routes =====================
