@@ -16,16 +16,25 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Vehicles Page
+// Vehicles Listing Page
 Route::get('/vehicles', function () {
     return view('vehicles.index');
 })->name('vehicles.index');
+
+//Vehicle Detail Page
+Route::get('/vehicles/{id}', function ($id) {
+    return view('vehicles.show', compact('id'));
+})->name('vehicles.show');
 
 // My Bookings Page
 Route::get('/my-bookings', function () {
     return view('bookings.index');
 })->name('user.bookings');
 
+// Booking Create Page 
+Route::get('/bookings/create/{id}', function ($id) {
+    return view('bookings.create', compact('id'));
+})->name('bookings.create');
 
 // ===================== Authenticated Routes =====================
 

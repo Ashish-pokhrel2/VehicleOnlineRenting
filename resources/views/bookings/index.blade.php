@@ -19,7 +19,6 @@
         <nav class="vehicles-nav-center">
             <a href="{{ route('home') }}">Home</a>
             <a href="{{ route('vehicles.index') }}">Vehicles</a>
-            <a href="#">Vendors</a>
             <a href="{{ route('user.bookings') }}" class="active">My Bookings</a>
         </nav>
 

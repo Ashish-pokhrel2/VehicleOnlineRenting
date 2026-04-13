@@ -19,7 +19,6 @@
         <nav class="nav-center">
             <a href="{{ route('home') }}" class="active">Home</a>
             <a href="{{ route('vehicles.index') }}">Vehicles</a>
-            <a href="#">Vendors</a>
             <a href="{{ route('user.bookings') }}">My Bookings</a>
         </nav>
 
@@ -117,7 +116,7 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$150<span>/day</span></div>
-                        <a href="{{ route('vehicles.index') }}">View Details →</a>
+                        <a href="{{ route('vehicles.show', 1) }}">View Details →</a>
                     </div>
                 </div>
             </div>
@@ -144,7 +143,7 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$300<span>/day</span></div>
-                        <a href="{{ route('vehicles.index') }}">View Details →</a>
+                        <a href="{{ route('vehicles.show', 2) }}">View Details →</a>
                     </div>
                 </div>
             </div>
@@ -171,7 +170,7 @@
                     </div>
                     <div class="vehicle-footer">
                         <div class="price">$180<span>/day</span></div>
-                        <a href="{{ route('vehicles.index') }}">View Details →</a>
+                        <a href="{{ route('vehicles.show', 3) }}">View Details →</a>
                     </div>
                 </div>
             </div>
@@ -237,7 +236,7 @@
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('vehicles.index') }}">Vehicles</a>
                 <a href="{{ route('login') }}">Login</a>
-                <a href="{{ route('bookings.index') }}">My Bookings</a>
+                <a href="{{ route('user.bookings') }}">My Bookings</a>
             </div>
 
             <div>

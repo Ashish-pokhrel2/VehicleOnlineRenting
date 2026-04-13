@@ -8,45 +8,48 @@
 </head>
 <body class="home-body">
 
+    <!-- ===================== Navbar ===================== -->
     <header class="vehicles-navbar">
-    <div class="vehicles-nav-left">
-        <a href="{{ route('home') }}" class="vehicles-brand-link">
-            <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
-            <span class="vehicles-brand-text">VehicleRent</span>
-        </a>
-    </div>
+        <div class="vehicles-nav-left">
+            <a href="{{ route('home') }}" class="vehicles-brand-link">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
+                <span class="vehicles-brand-text">VehicleRent</span>
+            </a>
+        </div>
 
-    <nav class="vehicles-nav-center">
-        <a href="{{ route('home') }}">Home</a>
-        <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
-        <a href="#">Vendors</a>
-        <a href="{{ route('user.bookings') }}">My Bookings</a>
-    </nav>
+        <nav class="vehicles-nav-center">
+            <a href="{{ route('home') }}">Home</a>
+            <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
+            <a href="{{ route('user.bookings') }}">My Bookings</a>
+        </nav>
 
-    <div class="vehicles-nav-right">
-        <span class="customer-pill">Customer</span>
-        <a href="#" class="logout-link">Logout</a>
-    </div>
-</header>
+        <div class="vehicles-nav-right">
+            <span class="customer-pill">Customer</span>
+            <a href="#" class="logout-link">Logout</a>
+        </div>
+    </header>
 
+    <!-- ===================== Main Content ===================== -->
     <main class="vehicles-page-wrapper">
+
+        <!-- Page Header -->
         <section class="vehicles-page-header">
             <h1>Available Vehicles</h1>
             <p>8 vehicles found</p>
         </section>
 
         <section class="vehicles-layout">
+
+            <!-- ===================== Filters Sidebar ===================== -->
             <aside class="vehicles-filter-card">
-                <h3>☰ Filters</h3>
+                <h3>Filters</h3>
 
                 <div class="filter-group">
                     <h4>Price Range</h4>
-
                     <div class="price-range-line">
                         <div class="range-dot left-dot"></div>
                         <div class="range-dot right-dot"></div>
                     </div>
-
                     <div class="price-labels">
                         <span>$0</span>
                         <span>$300</span>
@@ -55,7 +58,6 @@
 
                 <div class="filter-group">
                     <h4>Vehicle Type</h4>
-
                     <label class="filter-check"><input type="checkbox"> Car</label>
                     <label class="filter-check"><input type="checkbox"> Bike</label>
                     <label class="filter-check"><input type="checkbox"> Scooter</label>
@@ -64,7 +66,6 @@
 
                 <div class="filter-group">
                     <h4>Category</h4>
-
                     <label class="filter-check"><input type="checkbox"> Luxury</label>
                     <label class="filter-check"><input type="checkbox"> Sports</label>
                     <label class="filter-check"><input type="checkbox"> SUV</label>
@@ -78,7 +79,10 @@
                 <button class="reset-filter-btn">Reset Filters</button>
             </aside>
 
+            <!-- ===================== Vehicles Grid ===================== -->
             <section class="vehicles-grid-page">
+
+                <!-- Vehicle 1 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/car1.jpg') }}" alt="Mercedes S-Class">
@@ -100,11 +104,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$150<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 1) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 2 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/car2.jpg') }}" alt="Porsche 911">
@@ -126,11 +131,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$300<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 2) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 3 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/car3.jpg') }}" alt="Range Rover Sport">
@@ -152,11 +158,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$180<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 3) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 4 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/bike1.jpg') }}" alt="Harley Davidson">
@@ -177,11 +184,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$80<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 4) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 5 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/scooter.jpg') }}" alt="Electric Scooter">
@@ -201,11 +209,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$25<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 5) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 6 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/car4.jpg') }}" alt="Honda Accord">
@@ -227,11 +236,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$60<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 6) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 7 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/bmw.jpg') }}" alt="BMW Convertible">
@@ -253,11 +263,12 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$220<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 7) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Vehicle 8 -->
                 <div class="vehicle-card page-card">
                     <div class="vehicle-image-wrapper">
                         <img src="{{ asset('images/vehicles/van.jpg') }}" alt="Family Van">
@@ -279,10 +290,11 @@
                         </div>
                         <div class="vehicle-footer">
                             <div class="price">$90<span>/day</span></div>
-                            <a href="#">View Details →</a>
+                            <a href="{{ route('vehicles.show', 8) }}">View Details →</a>
                         </div>
                     </div>
                 </div>
+
             </section>
         </section>
     </main>
