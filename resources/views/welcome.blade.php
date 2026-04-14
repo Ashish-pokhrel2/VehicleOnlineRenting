@@ -16,13 +16,13 @@
             </a>
         </div>
 
-        <nav class="nav-center">
+        <nav class="nav-center desktop-nav">
             <a href="{{ route('home') }}" class="active">Home</a>
             <a href="{{ route('vehicles.index') }}">Vehicles</a>
             <a href="{{ route('user.bookings') }}">My Bookings</a>
         </nav>
 
-        <div class="nav-right">
+        <div class="nav-right desktop-actions">
             @auth
                 <a href="{{ route('dashboard') }}" class="login-link">Dashboard</a>
                 <form method="POST" action="{{ route('logout') }}" style="display:inline;">
@@ -34,7 +34,40 @@
                 <a href="{{ route('register') }}" class="signup-btn">Sign Up</a>
             @endauth
         </div>
+
+        <button class="mobile-menu-btn" id="mobileMenuBtn" type="button">☰</button>
     </header>
+
+    <!-- ===================== MOBILE MENU ===================== -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-inner">
+            <div class="mobile-menu-top">
+                <span class="mobile-menu-title">VehicleRent</span>
+                <button class="mobile-close-btn" id="mobileCloseBtn" type="button">✕</button>
+            </div>
+
+            <nav class="mobile-nav-links">
+                <a href="{{ route('home') }}">Home</a>
+                <a href="{{ route('vehicles.index') }}">Vehicles</a>
+                <a href="{{ route('user.bookings') }}">My Bookings</a>
+            </nav>
+
+            <div class="mobile-auth-links">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="mobile-dashboard-link">Dashboard</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="mobile-signup-btn">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="mobile-login-link">Login</a>
+                    <a href="{{ route('register') }}" class="mobile-signup-btn">Sign Up</a>
+                @endauth
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
     <!-- ===================== HERO SECTION ===================== -->
     <section class="hero">
@@ -255,6 +288,35 @@
             © {{ date('Y') }} VehicleRent. All rights reserved.
         </div>
     </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('show-mobile-menu');
+            mobileMenuOverlay.classList.add('show-mobile-overlay');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('show-mobile-menu');
+            mobileMenuOverlay.classList.remove('show-mobile-overlay');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+        }
+
+        if (mobileCloseBtn) {
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        }
+
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+    </script>
 
 </body>
 </html>
