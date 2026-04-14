@@ -7,94 +7,21 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div class="mb-8">
-            <a href="{{ route('vehicles.show', $id) }}" class="text-blue-600 font-semibold hover:underline">
+            <a href="{{ route('vehicles.show', $vehicle) }}" class="text-blue-600 font-semibold hover:underline">
                 Back to Vehicle Details
             </a>
         </div>
 
-        @php
-            $vehicles = [
-                1 => [
-                    'id' => 1,
-                    'name' => 'Mercedes S-Class',
-                    'category' => 'Car',
-                    'vendor' => 'Premium Rentals',
-                    'price_per_day' => 150,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/car1.jpg'),
-                ],
-                2 => [
-                    'id' => 2,
-                    'name' => 'Porsche 911',
-                    'category' => 'Sports Car',
-                    'vendor' => 'Premium Rentals',
-                    'price_per_day' => 300,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/car2.jpg'),
-                ],
-                3 => [
-                    'id' => 3,
-                    'name' => 'Range Rover Sport',
-                    'category' => 'SUV',
-                    'vendor' => 'Elite Motors',
-                    'price_per_day' => 180,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/car3.jpg'),
-                ],
-                4 => [
-                    'id' => 4,
-                    'name' => 'Harley Davidson',
-                    'category' => 'Bike',
-                    'vendor' => 'Elite Motors',
-                    'price_per_day' => 80,
-                    'location' => 'Dharan',
-                    'image' => asset('images/vehicles/bike1.jpg'),
-                ],
-                5 => [
-                    'id' => 5,
-                    'name' => 'Electric Scooter',
-                    'category' => 'Scooter',
-                    'vendor' => 'Urban Mobility',
-                    'price_per_day' => 25,
-                    'location' => 'Itahari',
-                    'image' => asset('images/vehicles/scooter.jpg'),
-                ],
-                6 => [
-                    'id' => 6,
-                    'name' => 'Honda Accord',
-                    'category' => 'Sedan',
-                    'vendor' => 'Urban Mobility',
-                    'price_per_day' => 60,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/car4.jpg'),
-                ],
-                7 => [
-                    'id' => 7,
-                    'name' => 'BMW Convertible',
-                    'category' => 'Convertible',
-                    'vendor' => 'Premium Rentals',
-                    'price_per_day' => 220,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/bmw.jpg'),
-                ],
-                8 => [
-                    'id' => 8,
-                    'name' => 'Family Van',
-                    'category' => 'Van',
-                    'vendor' => 'Elite Motors',
-                    'price_per_day' => 90,
-                    'location' => 'Biratnagar',
-                    'image' => asset('images/vehicles/van.jpg'),
-                ],
-            ];
-
-            $vehicle = $vehicles[$id] ?? $vehicles[1];
-
-            $estimatedDays = 3;
-            $serviceFee = 10;
-            $subtotal = $vehicle['price_per_day'] * $estimatedDays;
-            $total = $subtotal + $serviceFee;
-        @endphp
+        <!-- Loading and error states -->
+        @if ($isLoading)
+            <div class="mb-6 bg-white border border-gray-200 rounded-xl p-4 text-gray-500">
+                Loading booking details...
+            </div>
+        @elseif ($errorMessage)
+            <div class="mb-6 bg-white border border-red-200 rounded-xl p-4 text-red-600">
+                {{ $errorMessage }}
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -114,26 +41,26 @@
 
                     <div class="flex flex-col sm:flex-row gap-5">
                         <img
-                            src="{{ $vehicle['image'] }}"
-                            alt="{{ $vehicle['name'] }}"
+                            src="{{ asset($vehicle->image) }}"
+                            alt="{{ $vehicle->name }}"
                             class="w-full sm:w-64 h-44 object-cover rounded-xl border border-gray-200"
                         >
 
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900">{{ $vehicle['name'] }}</h3>
-                            <p class="text-gray-500 mt-1">{{ $vehicle['vendor'] }}</p>
+                            <h3 class="text-2xl font-bold text-gray-900">{{ $vehicle->name }}</h3>
+                            <p class="text-gray-500 mt-1">{{ $vehicle->vendor?->name ?? 'Unknown Vendor' }}</p>
 
                             <div class="flex flex-wrap gap-3 mt-4">
                                 <span class="bg-blue-100 text-blue-700 text-sm font-medium px-4 py-2 rounded-full">
-                                    {{ $vehicle['category'] }}
+                                    {{ $vehicle->category }}
                                 </span>
 
                                 <span class="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-2 rounded-full">
-                                    {{ $vehicle['location'] }}
+                                    {{ $vehicle->location }}
                                 </span>
 
                                 <span class="bg-green-100 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
-                                    ${{ $vehicle['price_per_day'] }}/day
+                                    ${{ $vehicle->price_per_day }}/day
                                 </span>
                             </div>
                         </div>
@@ -177,7 +104,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Location</label>
                                 <input
                                     type="text"
-                                    value="{{ $vehicle['location'] }}"
+                                    value="{{ $vehicle->location }}"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                             </div>
@@ -185,11 +112,11 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Time</label>
                                 <select class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option>9:00 AM</option>
-                                    <option>11:00 AM</option>
-                                    <option>1:00 PM</option>
-                                    <option>3:00 PM</option>
-                                    <option>5:00 PM</option>
+                                    @forelse ($pickupTimeSlots as $slot)
+                                        <option>{{ $slot->label }}</option>
+                                    @empty
+                                        <option disabled>No pickup times available</option>
+                                    @endforelse
                                 </select>
                             </div>
                         </div>
@@ -257,22 +184,22 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                                 <p class="text-sm text-gray-500">Selected Vehicle</p>
-                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle['name'] }}</p>
+                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle->name }}</p>
                             </div>
 
                             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                                 <p class="text-sm text-gray-500">Vendor</p>
-                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle['vendor'] }}</p>
+                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle->vendor?->name ?? 'Unknown Vendor' }}</p>
                             </div>
 
                             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                                 <p class="text-sm text-gray-500">Pickup City</p>
-                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle['location'] }}</p>
+                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle->location }}</p>
                             </div>
 
                             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                                 <p class="text-sm text-gray-500">Vehicle Type</p>
-                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle['category'] }}</p>
+                                <p class="mt-2 font-semibold text-gray-900">{{ $vehicle->type?->value ?? $vehicle->type }}</p>
                             </div>
                         </div>
                     </div>
@@ -289,22 +216,27 @@
                     <div class="mt-6 space-y-4">
                         <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                             <span class="text-gray-600">Vehicle</span>
-                            <span class="font-semibold text-gray-900">{{ $vehicle['name'] }}</span>
+                            <span class="font-semibold text-gray-900">{{ $vehicle->name }}</span>
                         </div>
 
                         <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                             <span class="text-gray-600">Category</span>
-                            <span class="font-semibold text-gray-900">{{ $vehicle['category'] }}</span>
+                            <span class="font-semibold text-gray-900">{{ $vehicle->category }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-200 pb-3">
+                            <span class="text-gray-600">Availability</span>
+                            <span class="font-semibold text-gray-900">{{ $availabilityLabel }}</span>
                         </div>
 
                         <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                             <span class="text-gray-600">Location</span>
-                            <span class="font-semibold text-gray-900">{{ $vehicle['location'] }}</span>
+                            <span class="font-semibold text-gray-900">{{ $vehicle->location }}</span>
                         </div>
 
                         <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                             <span class="text-gray-600">Rate Per Day</span>
-                            <span class="font-semibold text-gray-900">${{ $vehicle['price_per_day'] }}</span>
+                            <span class="font-semibold text-gray-900">${{ $vehicle->price_per_day }}</span>
                         </div>
 
                         <div class="flex justify-between items-center border-b border-gray-200 pb-3">
@@ -344,7 +276,7 @@
                         </button>
 
                         <a
-                            href="{{ route('vehicles.show', $vehicle['id']) }}"
+                            href="{{ route('vehicles.show', $vehicle) }}"
                             class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition"
                         >
                             Back to Details

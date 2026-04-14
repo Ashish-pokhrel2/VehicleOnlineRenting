@@ -35,7 +35,7 @@
         <!-- Page Header -->
         <section class="vehicles-page-header">
             <h1>Available Vehicles</h1>
-            <p>8 vehicles found</p>
+            <p>{{ $vehicles->count() }} vehicles found</p>
         </section>
 
         <section class="vehicles-layout">
@@ -51,29 +51,27 @@
                         <div class="range-dot right-dot"></div>
                     </div>
                     <div class="price-labels">
-                        <span>$0</span>
-                        <span>$300</span>
+                        <span>${{ $priceRange['min'] }}</span>
+                        <span>${{ $priceRange['max'] }}</span>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <h4>Vehicle Type</h4>
-                    <label class="filter-check"><input type="checkbox"> Car</label>
-                    <label class="filter-check"><input type="checkbox"> Bike</label>
-                    <label class="filter-check"><input type="checkbox"> Scooter</label>
-                    <label class="filter-check"><input type="checkbox"> Van</label>
+                    @forelse ($types as $type)
+                        <label class="filter-check"><input type="checkbox"> {{ $type }}</label>
+                    @empty
+                        <p class="text-sm text-gray-500">No types available</p>
+                    @endforelse
                 </div>
 
                 <div class="filter-group">
                     <h4>Category</h4>
-                    <label class="filter-check"><input type="checkbox"> Luxury</label>
-                    <label class="filter-check"><input type="checkbox"> Sports</label>
-                    <label class="filter-check"><input type="checkbox"> SUV</label>
-                    <label class="filter-check"><input type="checkbox"> Cruiser</label>
-                    <label class="filter-check"><input type="checkbox"> Electric</label>
-                    <label class="filter-check"><input type="checkbox"> Sedan</label>
-                    <label class="filter-check"><input type="checkbox"> Convertible</label>
-                    <label class="filter-check"><input type="checkbox"> Family</label>
+                    @forelse ($categories as $category)
+                        <label class="filter-check"><input type="checkbox"> {{ $category }}</label>
+                    @empty
+                        <p class="text-sm text-gray-500">No categories available</p>
+                    @endforelse
                 </div>
 
                 <button class="reset-filter-btn">Reset Filters</button>
@@ -81,219 +79,54 @@
 
             <!-- ===================== Vehicles Grid ===================== -->
             <section class="vehicles-grid-page">
-
-                <!-- Vehicle 1 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/car1.jpg') }}" alt="Mercedes S-Class">
-                        <span class="vehicle-tag">Luxury</span>
+                <!-- Loading, error, and empty states -->
+                @if ($isLoading)
+                    <div class="vehicle-card page-card">
+                        <div class="vehicle-content">
+                            <p class="text-gray-500">Loading vehicles...</p>
+                        </div>
                     </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Mercedes S-Class</h3>
-                                <p>Premium Rentals</p>
+                @elseif ($errorMessage)
+                    <div class="vehicle-card page-card">
+                        <div class="vehicle-content">
+                            <p class="text-red-600">{{ $errorMessage }}</p>
+                        </div>
+                    </div>
+                @else
+                    @forelse ($vehicles as $vehicle)
+                        <div class="vehicle-card page-card">
+                            <div class="vehicle-image-wrapper">
+                                <img src="{{ asset($vehicle->image) }}" alt="{{ $vehicle->name }}">
+                                <span class="vehicle-tag">{{ $vehicle->category }}</span>
                             </div>
-                            <span class="rating">4.9</span>
-                        </div>
-                        <small>156 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>5</span>
-                            <span>Automatic</span>
-                            <span>Hybrid</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$150<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 1) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 2 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/car2.jpg') }}" alt="Porsche 911">
-                        <span class="vehicle-tag">Sports</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Porsche 911</h3>
-                                <p>Premium Rentals</p>
+                            <div class="vehicle-content">
+                                <div class="vehicle-header">
+                                    <div>
+                                        <h3>{{ $vehicle->name }}</h3>
+                                        <p>{{ $vehicle->vendor?->name ?? 'Unknown Vendor' }}</p>
+                                    </div>
+                                    <span class="rating">{{ number_format($vehicle->rating, 1) }}</span>
+                                </div>
+                                <small>{{ $vehicle->reviews }} reviews</small>
+                                <div class="vehicle-meta">
+                                    <span>{{ $vehicle->seats }}</span>
+                                    <span>{{ $vehicle->transmission }}</span>
+                                    <span>{{ $vehicle->fuel }}</span>
+                                </div>
+                                <div class="vehicle-footer">
+                                    <div class="price">${{ $vehicle->price_per_day }}<span>/day</span></div>
+                                    <a href="{{ route('vehicles.show', $vehicle) }}">View Details →</a>
+                                </div>
                             </div>
-                            <span class="rating">5</span>
                         </div>
-                        <small>89 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>2</span>
-                            <span>Manual</span>
-                            <span>Gasoline</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$300<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 2) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 3 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/car3.jpg') }}" alt="Range Rover Sport">
-                        <span class="vehicle-tag">SUV</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Range Rover Sport</h3>
-                                <p>Elite Motors</p>
+                    @empty
+                        <div class="vehicle-card page-card">
+                            <div class="vehicle-content">
+                                <p class="text-gray-500">No vehicles available right now.</p>
                             </div>
-                            <span class="rating">4.8</span>
                         </div>
-                        <small>124 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>7</span>
-                            <span>Automatic</span>
-                            <span>Diesel</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$180<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 3) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 4 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/bike1.jpg') }}" alt="Harley Davidson">
-                        <span class="vehicle-tag">Cruiser</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Harley Davidson</h3>
-                                <p>Elite Motors</p>
-                            </div>
-                            <span class="rating">4.7</span>
-                        </div>
-                        <small>67 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>Manual</span>
-                            <span>Gasoline</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$80<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 4) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 5 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/scooter.jpg') }}" alt="Electric Scooter">
-                        <span class="vehicle-tag">Electric</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Electric Scooter</h3>
-                                <p>Urban Mobility</p>
-                            </div>
-                            <span class="rating">4.5</span>
-                        </div>
-                        <small>234 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>Electric</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$25<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 5) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 6 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/car4.jpg') }}" alt="Honda Accord">
-                        <span class="vehicle-tag">Sedan</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Honda Accord</h3>
-                                <p>Urban Mobility</p>
-                            </div>
-                            <span class="rating">4.6</span>
-                        </div>
-                        <small>198 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>5</span>
-                            <span>Automatic</span>
-                            <span>Gasoline</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$60<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 6) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 7 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/bmw.jpg') }}" alt="BMW Convertible">
-                        <span class="vehicle-tag">Convertible</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>BMW Convertible</h3>
-                                <p>Premium Rentals</p>
-                            </div>
-                            <span class="rating">4.9</span>
-                        </div>
-                        <small>92 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>4</span>
-                            <span>Automatic</span>
-                            <span>Gasoline</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$220<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 7) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle 8 -->
-                <div class="vehicle-card page-card">
-                    <div class="vehicle-image-wrapper">
-                        <img src="{{ asset('images/vehicles/van.jpg') }}" alt="Family Van">
-                        <span class="vehicle-tag">Family</span>
-                    </div>
-                    <div class="vehicle-content">
-                        <div class="vehicle-header">
-                            <div>
-                                <h3>Family Van</h3>
-                                <p>Elite Motors</p>
-                            </div>
-                            <span class="rating">4.7</span>
-                        </div>
-                        <small>145 reviews</small>
-                        <div class="vehicle-meta">
-                            <span>8</span>
-                            <span>Automatic</span>
-                            <span>Diesel</span>
-                        </div>
-                        <div class="vehicle-footer">
-                            <div class="price">$90<span>/day</span></div>
-                            <a href="{{ route('vehicles.show', 8) }}">View Details →</a>
-                        </div>
-                    </div>
-                </div>
+                    @endforelse
+                @endif
 
             </section>
         </section>
