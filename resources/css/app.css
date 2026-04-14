@@ -16,6 +16,12 @@ body.home-body {
 }
 
 /* Navbar */
+.brand-logo {
+    height: 54px;
+    width: auto;
+    display: block;
+}
+
 .navbar {
     max-width: 1200px;
     margin: 28px auto 18px;
@@ -28,17 +34,12 @@ body.home-body {
     justify-content: space-between;
     gap: 20px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .nav-left a {
     display: inline-flex;
     align-items: center;
-}
-
-.brand-logo {
-    height: 54px;
-    width: auto;
-    display: block;
 }
 
 .nav-center {
@@ -81,6 +82,130 @@ body.home-body {
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
+}
+
+.mobile-menu-btn {
+    display: none;
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    color: #111827;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 9999;
+    transition: right 0.3s ease;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-menu-inner {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.mobile-menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.mobile-menu-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.mobile-close-btn {
+    border: none;
+    background: transparent;
+    font-size: 26px;
+    cursor: pointer;
+    color: #111827;
+}
+
+.mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mobile-nav-links a {
+    text-decoration: none;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 14px;
+    border-radius: 12px;
+}
+
+.mobile-nav-links a:hover {
+    background: #f3f4f6;
+    color: #2563eb;
+}
+
+.mobile-auth-links {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobile-login-link,
+.mobile-dashboard-link {
+    text-decoration: none;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.mobile-signup-btn {
+    width: 100%;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    background: #020617;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 9998;
+    transition: all 0.3s ease;
+}
+
+.show-mobile-menu {
+    right: 0;
+}
+
+.show-mobile-overlay {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Hero */
@@ -513,34 +638,46 @@ body.home-body {
 }
 
 @media (max-width: 768px) {
+    /* Hide desktop navigation */
+    .desktop-nav,
+    .desktop-actions {
+        display: none;
+    }
+
+    /* Show hamburger menu */
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    /* Navbar spacing */
     .navbar {
-        flex-direction: column;
-        align-items: flex-start;
         padding: 18px 20px;
+        margin: 18px auto 14px;
     }
 
-    .nav-center,
-    .nav-right {
-        flex-wrap: wrap;
-        gap: 16px;
-    }
-
+    /* Hero Section */
     .hero-content {
-        padding: 72px 20px 80px;
+        padding: 64px 20px 72px;
     }
 
     .hero-content h1 {
         font-size: 42px;
+        line-height: 1.12;
     }
 
     .hero-content p {
         font-size: 18px;
+        line-height: 1.5;
+        margin-bottom: 30px;
     }
 
+    /* Search Box */
     .search-box {
         grid-template-columns: 1fr;
+        padding: 16px;
     }
 
+    /* Grids */
     .category-grid,
     .vehicles-grid,
     .why-grid,
@@ -548,10 +685,12 @@ body.home-body {
         grid-template-columns: 1fr;
     }
 
+    /* Section spacing */
     .section {
         padding: 58px 16px;
     }
 
+    /* CTA Section */
     .cta-section h2 {
         font-size: 36px;
     }
@@ -944,132 +1083,7 @@ body {
     padding: 40px 20px;
 }
 
-/* Remove extra spacing from sections */
-section {
-    margin: 0;
-    padding: 0;
-}
 
-/* ===============================
-   Navbar Consistency
-   =============================== */
-.navbar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-/* Logo */
-.navbar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-
-.navbar-logo img {
-    height: 40px;
-    width: auto;
-}
-
-.navbar-brand {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1f2937;
-}
-
-/* Navigation Links */
-.navbar-links {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
-.navbar-links a {
-    text-decoration: none;
-    color: #4b5563;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.navbar-links a:hover,
-.navbar-links a.active {
-    color: #2563eb;
-}
-
-/* Right Side (Login/User/Logout) */
-.navbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-/* User badge */
-.user-badge {
-    background-color: #eef2ff;
-    color: #4f46e5;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Logout button */
-.logout-btn {
-    text-decoration: none;
-    color: #374151;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Login button */
-.login-btn {
-    text-decoration: none;
-    background-color: #2563eb;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
-}
-
-.login-btn:hover {
-    background-color: #1d4ed8;
-}
-
-/* ===============================
-   Responsive Design
-   =============================== */
-@media (max-width: 768px) {
-    .navbar-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .navbar-links {
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .main-container {
-        padding: 30px 15px;
-    }
-}
 /* ===================== BOOKINGS PAGE (Updated to Match Blade) ===================== */
 
 .bookings-page-wrapper {
