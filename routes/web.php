@@ -17,17 +17,19 @@ use Illuminate\Support\Facades\Route;
 // Home Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Vehicles Listing Page
-Route::get('/vehicles', [VehiclePageController::class, 'index'])->name('vehicles.index');
+Route::middleware('auth')->group(function () {
+    // Vehicles Listing Page
+    Route::get('/vehicles', [VehiclePageController::class, 'index'])->name('vehicles.index');
 
-//Vehicle Detail Page
-Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])->name('vehicles.show');
+    //Vehicle Detail Page
+    Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])->name('vehicles.show');
 
-// My Bookings Page
-Route::get('/my-bookings', [BookingPageController::class, 'index'])->name('user.bookings');
+    // My Bookings Page
+    Route::get('/my-bookings', [BookingPageController::class, 'index'])->name('user.bookings');
 
-// Booking Create Page 
-Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
+    // Booking Create Page 
+    Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
+});
 
 // ===================== Authenticated Routes =====================
 

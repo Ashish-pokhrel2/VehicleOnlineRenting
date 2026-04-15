@@ -56,7 +56,6 @@
                         <option value="">Select role</option>
                         <option value="customer">Customer</option>
                         <option value="vendor">Vendor</option>
-                        <option value="admin">Admin</option>
                     </select>
                     <x-input-error :messages="$errors->get('role')" class="mt-2" />
                 </div>
