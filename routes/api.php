@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\BookingSettingController;
 use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PickupTimeSlotController;
 use App\Http\Controllers\ReviewsController;
 use App\Http\Controllers\VehiclesController;
 use Illuminate\Support\Facades\Route;
@@ -27,3 +29,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('vehicles', [VehiclesController::class, 'index']);
 Route::get('vehicles/{vehicle}', [VehiclesController::class, 'show']);
 Route::get('reviews', [ReviewsController::class, 'index']);
+Route::get('pickup-time-slots', [PickupTimeSlotController::class, 'index']);
+Route::get('booking-settings', [BookingSettingController::class, 'index']);

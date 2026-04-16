@@ -104,17 +104,34 @@
         <p class="section-subtitle">Choose from our wide range of vehicles</p>
 
         <div class="category-grid">
-            <div class="category-card">
-                <div class="category-icon"></div>
-                <h3>Cars</h3>
-                <p>5 vehicles available</p>
-            </div>
-
-            <div class="category-card">
-                <div class="category-icon"></div>
-                <h3>Bikes</h3>
-                <p>1 vehicles available</p>
-            </div>
+            <!-- Loading, error, and empty states -->
+            @if ($isLoading)
+                <div class="category-card">
+                    <div class="category-icon"></div>
+                    <h3>Loading</h3>
+                    <p>Fetching categories...</p>
+                </div>
+            @elseif ($errorMessage)
+                <div class="category-card">
+                    <div class="category-icon"></div>
+                    <h3>Unavailable</h3>
+                    <p>{{ $errorMessage }}</p>
+                </div>
+            @else
+                @forelse ($typeCounts as $typeCount)
+                    <div class="category-card">
+                        <div class="category-icon"></div>
+                        <h3>{{ $typeCount['label'] }}</h3>
+                        <p>{{ $typeCount['count'] }} vehicles available</p>
+                    </div>
+                @empty
+                    <div class="category-card">
+                        <div class="category-icon"></div>
+                        <h3>No categories</h3>
+                        <p>Vehicles will appear here once available</p>
+                    </div>
+                @endforelse
+            @endif
         </div>
     </section>
 
@@ -124,86 +141,53 @@
         <p class="section-subtitle">Popular choices from our collection</p>
 
         <div class="vehicles-grid">
-            <!-- Mercedes -->
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/car1.jpg') }}" alt="Mercedes S-Class">
-                    <span class="vehicle-tag">Luxury</span>
+            @if ($isLoading)
+                <div class="vehicle-card">
+                    <div class="vehicle-content">
+                        <p class="text-gray-500">Loading featured vehicles...</p>
+                    </div>
                 </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Mercedes S-Class</h3>
-                            <p>Premium Rentals</p>
+            @elseif ($errorMessage)
+                <div class="vehicle-card">
+                    <div class="vehicle-content">
+                        <p class="text-red-600">{{ $errorMessage }}</p>
+                    </div>
+                </div>
+            @else
+                @forelse ($featuredVehicles as $vehicle)
+                    <div class="vehicle-card">
+                        <div class="vehicle-image-wrapper">
+                            <img src="{{ asset($vehicle->image) }}" alt="{{ $vehicle->name }}">
+                            <span class="vehicle-tag">{{ $vehicle->category }}</span>
                         </div>
-                        <span class="rating">4.9</span>
-                    </div>
-                    <small>156 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>5</span>
-                        <span>Automatic</span>
-                        <span>Hybrid</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$150<span>/day</span></div>
-                        <a href="{{ route('vehicles.show', 1) }}">View Details →</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Porsche -->
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/car2.jpg') }}" alt="Porsche 911">
-                    <span class="vehicle-tag">Sports</span>
-                </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Porsche 911</h3>
-                            <p>Premium Rentals</p>
+                        <div class="vehicle-content">
+                            <div class="vehicle-header">
+                                <div>
+                                    <h3>{{ $vehicle->name }}</h3>
+                                    <p>{{ $vehicle->vendor?->name ?? 'Unknown Vendor' }}</p>
+                                </div>
+                                <span class="rating">{{ number_format($vehicle->rating, 1) }}</span>
+                            </div>
+                            <small>{{ $vehicle->reviews }} reviews</small>
+                            <div class="vehicle-meta">
+                                <span>{{ $vehicle->seats }}</span>
+                                <span>{{ $vehicle->transmission }}</span>
+                                <span>{{ $vehicle->fuel }}</span>
+                            </div>
+                            <div class="vehicle-footer">
+                                <div class="price">${{ $vehicle->price_per_day }}<span>/day</span></div>
+                                <a href="{{ route('vehicles.show', $vehicle) }}">View Details →</a>
+                            </div>
                         </div>
-                        <span class="rating">5</span>
                     </div>
-                    <small>89 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>2</span>
-                        <span>Manual</span>
-                        <span>Gasoline</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$300<span>/day</span></div>
-                        <a href="{{ route('vehicles.show', 2) }}">View Details →</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Range Rover -->
-            <div class="vehicle-card">
-                <div class="vehicle-image-wrapper">
-                    <img src="{{ asset('images/vehicles/car3.jpg') }}" alt="Range Rover Sport">
-                    <span class="vehicle-tag">SUV</span>
-                </div>
-                <div class="vehicle-content">
-                    <div class="vehicle-header">
-                        <div>
-                            <h3>Range Rover Sport</h3>
-                            <p>Elite Motors</p>
+                @empty
+                    <div class="vehicle-card">
+                        <div class="vehicle-content">
+                            <p class="text-gray-500">No featured vehicles available.</p>
                         </div>
-                        <span class="rating">4.8</span>
                     </div>
-                    <small>124 reviews</small>
-                    <div class="vehicle-meta">
-                        <span>7</span>
-                        <span>Automatic</span>
-                        <span>Diesel</span>
-                    </div>
-                    <div class="vehicle-footer">
-                        <div class="price">$180<span>/day</span></div>
-                        <a href="{{ route('vehicles.show', 3) }}">View Details →</a>
-                    </div>
-                </div>
-            </div>
+                @endforelse
+            @endif
         </div>
 
         <div class="center-btn">
