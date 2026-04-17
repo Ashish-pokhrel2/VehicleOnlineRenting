@@ -1,0 +1,296 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Enums\VehicleType;
+use App\Models\User;
+use App\Models\Vehicles;
+use Illuminate\Database\Seeder;
+
+class VehiclesSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $vendors = User::whereIn('email', [
+            'premium@rentals.test',
+            'elite@motors.test',
+            'urban@mobility.test',
+        ])->get()->keyBy('email');
+
+        $vehicles = [
+            [
+                'name' => 'Mercedes S-Class',
+                'type' => VehicleType::CAR,
+                'category' => 'Luxury',
+                'vendor_email' => 'premium@rentals.test',
+                'rating' => 4.9,
+                'reviews' => 156,
+                'price_per_day' => 150,
+                'location' => 'Biratnagar',
+                'transmission' => 'Automatic',
+                'fuel' => 'Hybrid',
+                'seats' => 5,
+                'description' => 'The Mercedes S-Class offers premium comfort, elegant styling, and a smooth driving experience. It is perfect for executive travel, family trips, and special events.',
+                'features' => [
+                    'Air Conditioning',
+                    'Bluetooth Connectivity',
+                    'Rear Camera',
+                    'Leather Seats',
+                    'GPS Navigation',
+                    'ABS Safety System',
+                    'USB Charging Port',
+                    'Premium Sound System',
+                ],
+                'images' => [
+                    'images/vehicles/car1.jpg',
+                    'images/vehicles/car2.jpg',
+                    'images/vehicles/car3.jpg',
+                    'images/vehicles/car4.jpg',
+                ],
+            ],
+            [
+                'name' => 'Porsche 911',
+                'type' => VehicleType::CAR,
+                'category' => 'Sports',
+                'vendor_email' => 'premium@rentals.test',
+                'rating' => 5.0,
+                'reviews' => 89,
+                'price_per_day' => 300,
+                'location' => 'Biratnagar',
+                'transmission' => 'Manual',
+                'fuel' => 'Gasoline',
+                'seats' => 2,
+                'description' => 'The Porsche 911 is built for speed, style, and performance. It is a perfect choice for drivers who want a luxury sports car experience.',
+                'features' => [
+                    'Sport Mode',
+                    'Bluetooth Connectivity',
+                    'Rear Camera',
+                    'Leather Interior',
+                    'Premium Sound System',
+                    'ABS Safety System',
+                    'Touchscreen Display',
+                    'USB Charging Port',
+                ],
+                'images' => [
+                    'images/vehicles/car2.jpg',
+                    'images/vehicles/car1.jpg',
+                    'images/vehicles/car3.jpg',
+                    'images/vehicles/bmw.jpg',
+                ],
+            ],
+            [
+                'name' => 'Range Rover Sport',
+                'type' => VehicleType::CAR,
+                'category' => 'SUV',
+                'vendor_email' => 'elite@motors.test',
+                'rating' => 4.8,
+                'reviews' => 124,
+                'price_per_day' => 180,
+                'location' => 'Biratnagar',
+                'transmission' => 'Automatic',
+                'fuel' => 'Diesel',
+                'seats' => 7,
+                'description' => 'Range Rover Sport provides luxury, comfort, and off-road capability. It is suitable for long trips, family use, and premium travel.',
+                'features' => [
+                    'Air Conditioning',
+                    '4WD Capability',
+                    'Rear Camera',
+                    'Leather Seats',
+                    'GPS Navigation',
+                    'ABS Safety System',
+                    'USB Charging Port',
+                    'Large Cargo Space',
+                ],
+                'images' => [
+                    'images/vehicles/car3.jpg',
+                    'images/vehicles/car1.jpg',
+                    'images/vehicles/car4.jpg',
+                    'images/vehicles/van.jpg',
+                ],
+            ],
+            [
+                'name' => 'Harley Davidson',
+                'type' => VehicleType::BIKE,
+                'category' => 'Cruiser',
+                'vendor_email' => 'elite@motors.test',
+                'rating' => 4.7,
+                'reviews' => 67,
+                'price_per_day' => 80,
+                'location' => 'Dharan',
+                'transmission' => 'Manual',
+                'fuel' => 'Gasoline',
+                'seats' => 2,
+                'description' => 'Harley Davidson is a powerful cruiser bike built for comfort and style. It is ideal for road trips, leisure rides, and premium biking experiences.',
+                'features' => [
+                    'Electric Start',
+                    'Dual Seating',
+                    'Disc Brakes',
+                    'Comfort Suspension',
+                    'Digital Meter',
+                    'LED Headlamp',
+                    'Fuel Efficient Engine',
+                    'Roadside Assistance',
+                ],
+                'images' => [
+                    'images/vehicles/bike1.jpg',
+                    'images/vehicles/bike1.jpg',
+                    'images/vehicles/car2.jpg',
+                    'images/vehicles/scooter.jpg',
+                ],
+            ],
+            [
+                'name' => 'Electric Scooter',
+                'type' => VehicleType::SCOOTER,
+                'category' => 'Electric',
+                'vendor_email' => 'urban@mobility.test',
+                'rating' => 4.5,
+                'reviews' => 234,
+                'price_per_day' => 25,
+                'location' => 'Itahari',
+                'transmission' => 'Automatic',
+                'fuel' => 'Electric',
+                'seats' => 2,
+                'description' => 'This electric scooter is lightweight, economical, and easy to ride. It is perfect for city travel, short-distance commuting, and eco-friendly mobility.',
+                'features' => [
+                    'Electric Motor',
+                    'Fast Charging',
+                    'Digital Display',
+                    'LED Lights',
+                    'Disc Brakes',
+                    'Comfort Seat',
+                    'Low Maintenance',
+                    'Silent Ride',
+                ],
+                'images' => [
+                    'images/vehicles/scooter.jpg',
+                    'images/vehicles/scooter.jpg',
+                    'images/vehicles/bike1.jpg',
+                    'images/vehicles/car4.jpg',
+                ],
+            ],
+            [
+                'name' => 'Honda Accord',
+                'type' => VehicleType::CAR,
+                'category' => 'Sedan',
+                'vendor_email' => 'urban@mobility.test',
+                'rating' => 4.6,
+                'reviews' => 198,
+                'price_per_day' => 60,
+                'location' => 'Biratnagar',
+                'transmission' => 'Automatic',
+                'fuel' => 'Gasoline',
+                'seats' => 5,
+                'description' => 'Honda Accord is a practical and comfortable sedan ideal for daily travel, business use, and family trips. It offers a reliable and smooth driving experience.',
+                'features' => [
+                    'Air Conditioning',
+                    'Bluetooth Connectivity',
+                    'Rear Camera',
+                    'Spacious Interior',
+                    'ABS Safety System',
+                    'USB Charging Port',
+                    'Comfort Seating',
+                    'Fuel Efficient Engine',
+                ],
+                'images' => [
+                    'images/vehicles/car4.jpg',
+                    'images/vehicles/car1.jpg',
+                    'images/vehicles/bmw.jpg',
+                    'images/vehicles/car2.jpg',
+                ],
+            ],
+            [
+                'name' => 'BMW Convertible',
+                'type' => VehicleType::CAR,
+                'category' => 'Convertible',
+                'vendor_email' => 'premium@rentals.test',
+                'rating' => 4.9,
+                'reviews' => 92,
+                'price_per_day' => 220,
+                'location' => 'Biratnagar',
+                'transmission' => 'Automatic',
+                'fuel' => 'Gasoline',
+                'seats' => 4,
+                'description' => 'BMW Convertible combines luxury and open-top driving in one premium package. It is suitable for weekend drives, city cruising, and stylish travel.',
+                'features' => [
+                    'Convertible Roof',
+                    'Leather Seats',
+                    'Bluetooth Connectivity',
+                    'Rear Camera',
+                    'Premium Sound System',
+                    'ABS Safety System',
+                    'USB Charging Port',
+                    'Touchscreen Display',
+                ],
+                'images' => [
+                    'images/vehicles/bmw.jpg',
+                    'images/vehicles/car1.jpg',
+                    'images/vehicles/car2.jpg',
+                    'images/vehicles/car3.jpg',
+                ],
+            ],
+            [
+                'name' => 'Family Van',
+                'type' => VehicleType::VAN,
+                'category' => 'Family',
+                'vendor_email' => 'elite@motors.test',
+                'rating' => 4.7,
+                'reviews' => 145,
+                'price_per_day' => 90,
+                'location' => 'Biratnagar',
+                'transmission' => 'Automatic',
+                'fuel' => 'Diesel',
+                'seats' => 8,
+                'description' => 'The Family Van offers spacious seating, comfort, and reliability for group and family travel. It is ideal for tours, airport drops, and long-distance journeys.',
+                'features' => [
+                    'Air Conditioning',
+                    'Large Seating Capacity',
+                    'Rear Camera',
+                    'Large Cargo Space',
+                    'ABS Safety System',
+                    'USB Charging Port',
+                    'Comfort Suspension',
+                    'Sliding Doors',
+                ],
+                'images' => [
+                    'images/vehicles/van.jpg',
+                    'images/vehicles/van.jpg',
+                    'images/vehicles/car3.jpg',
+                    'images/vehicles/car4.jpg',
+                ],
+            ],
+        ];
+
+        foreach ($vehicles as $vehicle) {
+            $images = $vehicle['images'];
+            $vendorId = $vendors[$vehicle['vendor_email']]->id;
+
+            Vehicles::updateOrCreate(
+                [
+                    'name' => $vehicle['name'],
+                    'vendor_id' => $vendorId,
+                ],
+                [
+                'name' => $vehicle['name'],
+                'type' => $vehicle['type'],
+                'category' => $vehicle['category'],
+                'location' => $vehicle['location'],
+                'price_per_day' => $vehicle['price_per_day'],
+                'rating' => $vehicle['rating'],
+                'reviews' => $vehicle['reviews'],
+                'image' => $images[0] ?? null,
+                'images' => $images,
+                'features' => $vehicle['features'],
+                'description' => $vehicle['description'],
+                'seats' => $vehicle['seats'],
+                'transmission' => $vehicle['transmission'],
+                'fuel' => $vehicle['fuel'],
+                'vendor_id' => $vendorId,
+                'available' => true,
+                ]
+            );
+        }
+    }
+}

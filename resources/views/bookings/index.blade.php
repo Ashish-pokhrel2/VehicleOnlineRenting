@@ -35,134 +35,82 @@
         </section>
 
         <section class="bookings-list">
-
-            <div class="booking-card">
-                <div class="booking-image">
-                    <img src="{{ asset('images/vehicles/car1.jpg') }}" alt="Mercedes S-Class">
-                </div>
-
-                <div class="booking-content">
-                    <div class="booking-top-row">
-                        <div>
-                            <h3>Mercedes S-Class</h3>
-                            <p class="booking-id">Booking ID: b1</p>
-                        </div>
-                        <span class="booking-status status-confirmed">Confirmed</span>
-                    </div>
-
-                    <div class="booking-info-row">
-                        <div class="booking-info-item">
-                            <span class="booking-label">Pick-up</span>
-                            <strong>3/25/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Drop-off</span>
-                            <strong>3/28/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Total Price</span>
-                            <strong>$450</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Booked On</span>
-                            <strong>3/20/2026</strong>
-                        </div>
-                    </div>
-
-                    <div class="booking-actions">
-                        <a href="#" class="booking-btn booking-btn-dark">View Details</a>
-                        <a href="#" class="booking-btn booking-btn-light">Contact Vendor</a>
+            <!-- Loading, error, and empty states -->
+            @if ($isLoading)
+                <div class="booking-card">
+                    <div class="booking-content">
+                        <p class="text-gray-500">Loading bookings...</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="booking-card">
-                <div class="booking-image">
-                    <img src="{{ asset('images/vehicles/bike1.jpg') }}" alt="Harley Davidson">
-                </div>
-
-                <div class="booking-content">
-                    <div class="booking-top-row">
-                        <div>
-                            <h3>Harley Davidson</h3>
-                            <p class="booking-id">Booking ID: b2</p>
-                        </div>
-                        <span class="booking-status status-pending">Pending</span>
-                    </div>
-
-                    <div class="booking-info-row">
-                        <div class="booking-info-item">
-                            <span class="booking-label">Pick-up</span>
-                            <strong>4/1/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Drop-off</span>
-                            <strong>4/3/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Total Price</span>
-                            <strong>$160</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Booked On</span>
-                            <strong>3/22/2026</strong>
-                        </div>
-                    </div>
-
-                    <div class="booking-actions">
-                        <a href="#" class="booking-btn booking-btn-light">Modify Booking</a>
-                        <a href="#" class="booking-btn booking-btn-danger">Cancel Booking</a>
+            @elseif ($errorMessage)
+                <div class="booking-card">
+                    <div class="booking-content">
+                        <p class="text-red-600">{{ $errorMessage }}</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="booking-card">
-                <div class="booking-image">
-                    <img src="{{ asset('images/vehicles/car3.jpg') }}" alt="Range Rover Sport">
-                </div>
-
-                <div class="booking-content">
-                    <div class="booking-top-row">
-                        <div>
-                            <h3>Range Rover Sport</h3>
-                            <p class="booking-id">Booking ID: b3</p>
+            @else
+                @forelse ($bookings as $booking)
+                    @php
+                        $statusLabel = $booking->status->value ?? (string) $booking->status;
+                        $statusClass = $statusClasses[$statusLabel] ?? 'status-pending';
+                    @endphp
+                    <div class="booking-card">
+                        <div class="booking-image">
+                            <img src="{{ asset($booking->vehicle?->image) }}" alt="{{ $booking->vehicle?->name }}">
                         </div>
-                        <span class="booking-status status-completed">Completed</span>
+
+                        <div class="booking-content">
+                            <div class="booking-top-row">
+                                <div>
+                                    <h3>{{ $booking->vehicle?->name }}</h3>
+                                    <p class="booking-id">Booking ID: b{{ $booking->id }}</p>
+                                </div>
+                                <span class="booking-status {{ $statusClass }}">{{ $statusLabel }}</span>
+                            </div>
+
+                            <div class="booking-info-row">
+                                <div class="booking-info-item">
+                                    <span class="booking-label">Pick-up</span>
+                                    <strong>{{ $booking->start_date?->format('n/j/Y') }}</strong>
+                                </div>
+
+                                <div class="booking-info-item">
+                                    <span class="booking-label">Drop-off</span>
+                                    <strong>{{ $booking->end_date?->format('n/j/Y') }}</strong>
+                                </div>
+
+                                <div class="booking-info-item">
+                                    <span class="booking-label">Total Price</span>
+                                    <strong>${{ $booking->total_price }}</strong>
+                                </div>
+
+                                <div class="booking-info-item">
+                                    <span class="booking-label">Booked On</span>
+                                    <strong>{{ $booking->created_at?->format('n/j/Y') }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="booking-actions">
+                                @if ($statusLabel === 'Confirmed')
+                                    <a href="#" class="booking-btn booking-btn-dark">View Details</a>
+                                    <a href="#" class="booking-btn booking-btn-light">Contact Vendor</a>
+                                @elseif ($statusLabel === 'Pending')
+                                    <a href="#" class="booking-btn booking-btn-light">Modify Booking</a>
+                                    <a href="#" class="booking-btn booking-btn-danger">Cancel Booking</a>
+                                @elseif ($statusLabel === 'Completed')
+                                    <a href="#" class="booking-btn booking-btn-dark">Book Again</a>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="booking-info-row">
-                        <div class="booking-info-item">
-                            <span class="booking-label">Pick-up</span>
-                            <strong>3/15/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Drop-off</span>
-                            <strong>3/18/2026</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Total Price</span>
-                            <strong>$540</strong>
-                        </div>
-
-                        <div class="booking-info-item">
-                            <span class="booking-label">Booked On</span>
-                            <strong>3/10/2026</strong>
+                @empty
+                    <div class="booking-card">
+                        <div class="booking-content">
+                            <p class="text-gray-500">No bookings available yet.</p>
                         </div>
                     </div>
-
-                    <div class="booking-actions">
-                        <a href="#" class="booking-btn booking-btn-dark">Book Again</a>
-                    </div>
-                </div>
-            </div>
+                @endforelse
+            @endif
 
         </section>
     </main>

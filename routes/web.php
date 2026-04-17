@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\BookingPageController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VehiclePageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,29 +15,21 @@ use Illuminate\Support\Facades\Route;
 // ===================== Public Routes =====================
 
 // Home Page
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Vehicles Listing Page
-Route::get('/vehicles', function () {
-    return view('vehicles.index');
-})->name('vehicles.index');
+Route::middleware('auth')->group(function () {
+    // Vehicles Listing Page
+    Route::get('/vehicles', [VehiclePageController::class, 'index'])->name('vehicles.index');
 
-//Vehicle Detail Page
-Route::get('/vehicles/{id}', function ($id) {
-    return view('vehicles.show', compact('id'));
-})->name('vehicles.show');
+    //Vehicle Detail Page
+    Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])->name('vehicles.show');
 
-// My Bookings Page
-Route::get('/my-bookings', function () {
-    return view('bookings.index');
-})->name('user.bookings');
+    // My Bookings Page
+    Route::get('/my-bookings', [BookingPageController::class, 'index'])->name('user.bookings');
 
-// Booking Create Page 
-Route::get('/bookings/create/{id}', function ($id) {
-    return view('bookings.create', compact('id'));
-})->name('bookings.create');
+    // Booking Create Page 
+    Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
+});
 
 // ===================== Authenticated Routes =====================
 

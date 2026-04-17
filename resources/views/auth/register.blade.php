@@ -42,11 +42,17 @@
 
                 <!-- Phone Number -->
                 <div class="simple-login-field">
-                    <label for="phone" class="simple-login-label">Phone Number</label>
-                    <input id="phone" type="text" name="phone" value="{{ old('phone') }}"
-                        required class="simple-login-input" placeholder="9812345678">
+                    <label for="phone_digits" class="simple-login-label">Phone Number</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <select id="country_code" name="country_code" required class="simple-login-input" style="max-width:110px;">
+                            <option value="NP" @selected(old('country_code', 'NP') === 'NP')>NP (+977)</option>
+                        </select>
+                        <input id="phone_digits" type="text" name="phone_digits" value="{{ old('phone_digits') }}"
+                            required class="simple-login-input" placeholder="9812345678">
+                    </div>
                     <small style="color:#6b7280;">Enter only the 10-digit phone number (e.g., 9812345678)</small>
-                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('country_code')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('phone_digits')" class="mt-2" />
                 </div>
 
                 <!-- Register As -->
@@ -56,7 +62,6 @@
                         <option value="">Select role</option>
                         <option value="customer">Customer</option>
                         <option value="vendor">Vendor</option>
-                        <option value="admin">Admin</option>
                     </select>
                     <x-input-error :messages="$errors->get('role')" class="mt-2" />
                 </div>
