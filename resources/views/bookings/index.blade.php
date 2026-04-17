@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VehicleRent - My Bookings</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="home-body">
 
     <header class="vehicles-navbar">
@@ -24,7 +26,14 @@
 
         <div class="vehicles-nav-right">
             <span class="customer-pill">Customer</span>
-            <a href="#" class="logout-link">Logout</a>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <a href="{{ route('logout') }}" class="logout-link"
+                    onclick="event.preventDefault(); document.querySelector('form').submit();">Logout</a>
+
+
+            </form>
         </div>
     </header>
 
@@ -116,4 +125,5 @@
     </main>
 
 </body>
+
 </html>

@@ -25,7 +25,10 @@
 
         <div class="vehicles-nav-right">
             <span class="customer-pill">Customer</span>
-            <a href="#" class="logout-link">Logout</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+            </form>
+            <a href="{{ route('logout') }}" class="logout-link" onclick="event.preventDefault(); document.querySelector('form').submit();">Logout</a>
         </div>
     </header>
 
