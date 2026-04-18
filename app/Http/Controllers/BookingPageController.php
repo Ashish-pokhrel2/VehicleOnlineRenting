@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingStatus;
 use App\Models\BookingSetting;
 use App\Models\Bookings;
 use App\Models\PickupTimeSlot;
 use App\Models\Vehicles;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BookingPageController extends Controller
@@ -67,4 +71,35 @@ class BookingPageController extends Controller
             'errorMessage' => null,
         ]);
     }
+
+public function store(Request $request): RedirectResponse
+{
+    $validated = $request->validate([
+        'vehicle_id' => 'required|exists:vehicles,id',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+    ]);
+
+    $vehicle = Vehicles::findOrFail($validated['vehicle_id']);
+
+    $startDate = Carbon::parse($validated['start_date']);
+    $endDate = Carbon::parse($validated['end_date']);
+
+    $days = max(1, $startDate->diffInDays($endDate));
+    $totalPrice = $vehicle->price_per_day * $days;
+
+    Bookings::create([
+        'vehicle_id' => $vehicle->id,
+        'customer_id' => auth()->id(),
+        'vendor_id' => $vehicle->vendor_id,
+        'start_date' => $validated['start_date'],
+        'end_date' => $validated['end_date'],
+        'total_price' => $totalPrice,
+        'status' => BookingStatus::PENDING,
+    ]);
+
+    return redirect()
+        ->route('user.bookings')
+        ->with('success', 'Booking confirmed successfully.');
+}
 }

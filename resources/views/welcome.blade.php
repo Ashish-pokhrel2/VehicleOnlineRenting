@@ -79,21 +79,28 @@
                     <br>flexible options.
                 </p>
 
-                <div class="search-box">
+                <!-- Updated Search Form -->
+                <form id="searchForm" class="search-box">
                     <div class="search-item">
-                        <input type="text" placeholder="Location">
+                        <input type="text" id="location" name="location" placeholder="Location">
                     </div>
 
                     <div class="search-item">
-                        <input type="text" placeholder="mm/dd/year">
+                        <input type="date" id="date" name="date">
                     </div>
 
                     <div class="search-item">
-                        <input type="text" placeholder="Vehicles Type">
+                        <input type="text" id="vehicle_type" name="vehicle_type" placeholder="Vehicles Type">
                     </div>
 
-                    <button class="search-btn">Search</button>
-                </div>
+                    <button type="submit" class="search-btn">Search</button>
+                </form>
+
+                <!-- Search Messages -->
+                <div id="searchMessage" style="margin-top: 18px; color: white; font-weight: 500;"></div>
+
+                <!-- Search Results -->
+                <div id="searchResults" style="margin-top: 24px; width: 100%;"></div>
             </div>
         </div>
     </section>
@@ -299,6 +306,93 @@
 
         if (mobileMenuOverlay) {
             mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        // AJAX Search
+        const searchForm = document.getElementById('searchForm');
+        const searchMessage = document.getElementById('searchMessage');
+        const searchResults = document.getElementById('searchResults');
+
+        if (searchForm) {
+            searchForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const location = document.getElementById('location').value.trim();
+                const date = document.getElementById('date').value;
+                const vehicleType = document.getElementById('vehicle_type').value.trim();
+
+                searchMessage.innerHTML = 'Searching...';
+                searchResults.innerHTML = '';
+
+                try {
+                    const params = new URLSearchParams({
+                        location: location,
+                        date: date,
+                        vehicle_type: vehicleType
+                    });
+
+                    const response = await fetch(`{{ route('vehicles.search.ajax') }}?${params.toString()}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Search failed.');
+                    }
+
+                    searchMessage.innerHTML = '';
+
+                    if (!data.vehicles || data.vehicles.length === 0) {
+                        searchResults.innerHTML = `
+                            <div style="background:#fff; padding:20px; border-radius:16px; color:#111; max-width:1100px; margin:0 auto;">
+                                <p style="margin:0; font-weight:600;">No vehicles found.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = `
+                        <div style="background:#fff; padding:24px; border-radius:20px; color:#111; max-width:1100px; margin:0 auto;">
+                            <h3 style="margin-bottom:20px;">Search Results</h3>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 420px)); justify-content:center; gap:20px;">
+                    `;
+
+                   data.vehicles.forEach(vehicle => {
+    html += `
+        <div style="border:1px solid #ddd; border-radius:16px; overflow:hidden; background:#fff;">
+            <img src="${vehicle.image_url}" alt="${vehicle.name}" style="width:100%; height:220px; object-fit:cover;">
+            <div style="padding:16px; text-align:left;">
+                <h4 style="margin:0 0 12px 0; text-align:center;">${vehicle.name}</h4>
+                <p style="margin:0 0 10px 0; color:#111;"><strong>Type:</strong> ${vehicle.category ?? vehicle.type ?? 'N/A'}</p>
+                <p style="margin:0 0 10px 0; color:#111;"><strong>Location:</strong> ${vehicle.location ?? 'N/A'}</p>
+                <p style="margin:0 0 16px 0; color:#111;"><strong>Price:</strong> $${vehicle.price_per_day}/day</p>
+                <div style="text-align:center;">
+                    <a href="/vehicles/${vehicle.id}" style="display:inline-block; padding:10px 16px; background:#020826; color:#fff; text-decoration:none; border-radius:10px;">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+});
+
+                    html += `</div></div>`;
+                    searchResults.innerHTML = html;
+                } catch (error) {
+                    searchMessage.innerHTML = '';
+                    searchResults.innerHTML = `
+                        <div style="background:#fff; padding:20px; border-radius:16px; color:red; max-width:1100px; margin:0 auto;">
+                            Something went wrong while searching.
+                        </div>
+                    `;
+                    console.error(error);
+                }
+            });
         }
     </script>
 

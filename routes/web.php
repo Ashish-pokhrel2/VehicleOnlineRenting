@@ -17,11 +17,14 @@ use Illuminate\Support\Facades\Route;
 // Home Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// AJAX Search Route
+Route::get('/vehicles/search/ajax', [VehiclePageController::class, 'ajaxSearch'])->name('vehicles.search.ajax');
+
 Route::middleware('auth')->group(function () {
     // Vehicles Listing Page
     Route::get('/vehicles', [VehiclePageController::class, 'index'])->name('vehicles.index');
 
-    //Vehicle Detail Page
+    // Vehicle Detail Page
     Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])->name('vehicles.show');
 
     // My Bookings Page
@@ -29,6 +32,9 @@ Route::middleware('auth')->group(function () {
 
     // Booking Create Page 
     Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
+
+    // Booking Store Route
+    Route::post('/bookings', [BookingPageController::class, 'store'])->name('bookings.page.store');
 });
 
 // ===================== Authenticated Routes =====================
@@ -44,7 +50,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 // ===================== Authentication Routes =====================
 require __DIR__.'/auth.php';
