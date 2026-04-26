@@ -9,28 +9,7 @@
 <body class="home-body">
 
     <!-- ===================== Navbar ===================== -->
-    <header class="vehicles-navbar">
-        <div class="vehicles-nav-left">
-            <a href="{{ route('home') }}" class="vehicles-brand-link">
-                <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
-                <span class="vehicles-brand-text">VehicleRent</span>
-            </a>
-        </div>
-
-        <nav class="vehicles-nav-center">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('vehicles.index') }}" class="active">Vehicles</a>
-            <a href="{{ route('user.bookings') }}">My Bookings</a>
-        </nav>
-
-        <div class="vehicles-nav-right">
-            <span class="customer-pill">Customer</span>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-            </form>
-            <a href="{{ route('logout') }}" class="logout-link" onclick="event.preventDefault(); document.querySelector('form').submit();">Logout</a>
-        </div>
-    </header>
+    @include('partials.navbar')
 
     <!-- ===================== Main Content ===================== -->
     <main class="vehicles-page-wrapper">
@@ -97,7 +76,7 @@
                     </div>
                 @else
                     @forelse ($vehicles as $vehicle)
-                        <div class="vehicle-card page-card">
+                        <div class="vehicle-card page-card" onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
                             <div class="vehicle-image-wrapper">
                                 <img src="{{ asset($vehicle->image) }}" alt="{{ $vehicle->name }}">
                                 <span class="vehicle-tag">{{ $vehicle->category }}</span>
@@ -118,7 +97,7 @@
                                 </div>
                                 <div class="vehicle-footer">
                                     <div class="price">${{ $vehicle->price_per_day }}<span>/day</span></div>
-                                    <a href="{{ route('vehicles.show', $vehicle) }}">View Details →</a>
+                                    <a href="{{ route('vehicles.show', $vehicle) }}" onclick="event.stopPropagation();">View Details →</a>
                                 </div>
                             </div>
                         </div>
