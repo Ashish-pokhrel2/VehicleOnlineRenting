@@ -10,32 +10,7 @@
 
 <body class="home-body">
 
-    <header class="vehicles-navbar">
-        <div class="vehicles-nav-left">
-            <a href="{{ route('home') }}" class="vehicles-brand-link">
-                <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="vehicles-brand-logo">
-                <span class="vehicles-brand-text">VehicleRent</span>
-            </a>
-        </div>
-
-        <nav class="vehicles-nav-center">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('vehicles.index') }}">Vehicles</a>
-            <a href="{{ route('user.bookings') }}" class="active">My Bookings</a>
-        </nav>
-
-        <div class="vehicles-nav-right">
-            <span class="customer-pill">Customer</span>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <a href="{{ route('logout') }}" class="logout-link"
-                    onclick="event.preventDefault(); document.querySelector('form').submit();">Logout</a>
-
-
-            </form>
-        </div>
-    </header>
+@include('partials.navbar')
 
     <main class="bookings-page-wrapper">
         <section class="bookings-page-header">
