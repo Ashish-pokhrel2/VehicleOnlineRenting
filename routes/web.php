@@ -54,11 +54,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/users', function (Request $request) {
-            abort_unless($request->user()?->isAdmin(), 403);
-
-            return view('admin.users');
-        })->name('users');
+        Route::get('/users', [DashboardController::class, 'users'])->name('users');
+        Route::patch('/users/{user}/status', [DashboardController::class, 'updateUserStatus'])->name('users.status');
 
         Route::get('/vehicles', function (Request $request) {
             abort_unless($request->user()?->isAdmin(), 403);
