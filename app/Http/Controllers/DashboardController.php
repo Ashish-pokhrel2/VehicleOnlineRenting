@@ -121,6 +121,39 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function bookings(Request $request): View
+    {
+        $user = $request->user();
+        abort_unless($user?->isAdmin(), Response::HTTP_FORBIDDEN);
+
+        $search = trim((string) $request->string('search')->value());
+
+        $bookings = Bookings::query()
+            ->with([
+                'vehicle:id,name,image',
+                'customer:id,name',
+                'vendor:id,name',
+            ])
+            ->when(
+                $search !== '',
+                fn ($query) => $query->where(function ($subQuery) use ($search) {
+                    $subQuery
+                        ->where('id', 'like', "%{$search}%")
+                        ->orWhereHas('vehicle', fn ($q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('vendor', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+                })
+            )
+            ->orderBy('id')
+            ->get();
+
+        return view('admin.bookings', [
+            'bookings' => $bookings,
+            'search' => $search,
+            'totalBookings' => Bookings::query()->count(),
+        ]);
+    }
+
     public function updateUserStatus(Request $request, User $user): RedirectResponse
     {
         $admin = $request->user();
