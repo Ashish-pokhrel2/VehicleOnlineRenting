@@ -36,4 +36,5 @@ copilot-instructions.md
 .mcp.json
 composer.lock
 composer.json
-tests/Feature/API
+tests/Feature
+tests/Unit

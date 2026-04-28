@@ -1,4 +1,8 @@
- <header class="navbar">
+@php
+    $isAdmin = auth()->check() && auth()->user()->isAdmin();
+@endphp
+
+<header class="navbar">
         <div class="nav-left">
             <a href="{{ route('home') }}">
                 <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent Logo" class="brand-logo">
@@ -6,20 +10,19 @@
         </div>
 
         <nav class="nav-center desktop-nav">
-            <a href="{{ route('home') }}"
-class="{{ request()->routeIs('home') ? 'active' : '' }}">
-Home
-</a>
+            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
+                Home
+            </a>
 
-<a href="{{ route('vehicles.index') }}"
-class="{{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
-Vehicles
-</a>
+            <a href="{{ route('vehicles.index') }}" class="{{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+                Vehicles
+            </a>
 
-<a href="{{ route('user.bookings') }}"
-class="{{ request()->routeIs('user.bookings') ? 'active' : '' }}">
-My Bookings
-</a>
+            @if (! $isAdmin)
+                <a href="{{ route('user.bookings') }}" class="{{ request()->routeIs('user.bookings') ? 'active' : '' }}">
+                    My Bookings
+                </a>
+            @endif
         </nav>
 
         <div class="nav-right desktop-actions">
@@ -28,7 +31,7 @@ My Bookings
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
-                    <span>Customer</span>
+                    <span>{{ $isAdmin ? 'Admin' : 'Customer' }}</span>
                 </div>
         
                 <form method="POST" action="{{ route('logout') }}" style="display:inline;">
