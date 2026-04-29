@@ -38,7 +38,7 @@
             </div>
         @endif
 
-        <form id="bookingForm" method="POST" action="{{ route('bookings.page.store') }}">
+        <form id="bookingForm" method="POST" action="{{ route('bookings.page.store') }}" novalidate>
             @csrf
             <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
 
@@ -77,7 +77,7 @@
                                     </span>
 
                                     <span class="bg-green-100 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
-                                        ${{ $vehicle->price_per_day }}/day
+                                        Rs. {{ number_format($vehicle->price_per_day, 0) }}/day
                                     </span>
                                 </div>
                             </div>
@@ -95,7 +95,6 @@
                                     name="start_date"
                                     value="{{ old('start_date') }}"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
                                 >
                             </div>
 
@@ -106,7 +105,6 @@
                                     name="end_date"
                                     value="{{ old('end_date') }}"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
                                 >
                             </div>
                         </div>
@@ -128,11 +126,15 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Time</label>
-                                <select class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    name="pickup_time"
+                                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Select pickup time</option>
                                     @forelse ($pickupTimeSlots as $slot)
-                                        <option>{{ $slot->label }}</option>
+                                        <option value="{{ $slot->label }}">{{ $slot->label }}</option>
                                     @empty
-                                        <option disabled>No pickup times available</option>
+                                        <option value="" disabled>No pickup times available</option>
                                     @endforelse
                                 </select>
                             </div>
@@ -147,6 +149,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                                 <input
                                     type="text"
+                                    name="full_name"
                                     placeholder="Enter your full name"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -156,6 +159,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                                 <input
                                     type="text"
+                                    name="phone"
                                     placeholder="Enter your phone number"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -165,6 +169,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                                 <input
                                     type="email"
+                                    name="email"
                                     placeholder="Enter your email address"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -174,6 +179,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Citizenship / ID Number</label>
                                 <input
                                     type="text"
+                                    name="citizenship_id"
                                     placeholder="Enter your citizenship or ID number"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -183,6 +189,7 @@
                         <div class="mt-5">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Special Request</label>
                             <textarea
+                                name="special_request"
                                 rows="4"
                                 placeholder="Write any additional request here"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -218,7 +225,7 @@
                 </div>
 
                 <div>
-                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sticky top-24">
+                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sticky top-2">
                         <h2 class="text-2xl font-semibold text-gray-900">Booking Summary</h2>
                         <p class="text-gray-500 mt-2">Review your booking details before final confirmation.</p>
 
@@ -245,7 +252,7 @@
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Rate Per Day</span>
-                                <span class="font-semibold text-gray-900">${{ $vehicle->price_per_day }}</span>
+                                <span class="font-semibold text-gray-900">Rs. {{ number_format($vehicle->price_per_day, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
@@ -255,17 +262,17 @@
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold text-gray-900">${{ $subtotal }}</span>
+                                <span class="font-semibold text-gray-900">Rs. {{ number_format($subtotal, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Service Fee</span>
-                                <span class="font-semibold text-gray-900">${{ $serviceFee }}</span>
+                                <span class="font-semibold text-gray-900">Rs. {{ number_format($serviceFee, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center pt-2">
                                 <span class="text-lg font-semibold text-gray-900">Total Price</span>
-                                <span class="text-2xl font-bold text-blue-600">${{ $total }}</span>
+                                <span class="text-2xl font-bold text-blue-600">Rs. {{ number_format($total, 0) }}</span>
                             </div>
                         </div>
 
@@ -300,6 +307,85 @@
                 </div>
 
             </div>
+
+           <script>
+const bookingForm = document.getElementById('bookingForm');
+
+const fields = [
+    { name: 'start_date', label: 'Pick-up Date' },
+    { name: 'end_date', label: 'Drop-off Date' },
+    { name: 'pickup_time', label: 'Pickup Time' },
+    { name: 'full_name', label: 'Full Name' },
+    { name: 'phone', label: 'Phone Number' },
+    { name: 'email', label: 'Email Address' },
+    { name: 'citizenship_id', label: 'Citizenship / ID Number' },
+    { name: 'special_request', label: 'Special Request' }
+];
+
+function showError(input, label) {
+    input.classList.add('border-red-500');
+
+    if (!input.parentNode.querySelector('.field-error')) {
+        const err = document.createElement('p');
+        err.className = 'field-error text-red-500 text-sm mt-1';
+        err.textContent = label + ' is required.';
+        input.parentNode.appendChild(err);
+    }
+}
+
+function clearError(input) {
+    input.classList.remove('border-red-500');
+    const err = input.parentNode.querySelector('.field-error');
+    if (err) {
+        err.remove();
+    }
+}
+
+fields.forEach(function(field) {
+    const input = document.querySelector('[name="' + field.name + '"]');
+
+    if (input) {
+        input.addEventListener('input', function() {
+            if (input.value.trim()) {
+                clearError(input);
+            }
+        });
+
+        input.addEventListener('change', function() {
+            if (input.value.trim()) {
+                clearError(input);
+            }
+        });
+    }
+});
+
+bookingForm.addEventListener('submit', function(e) {
+    let hasError = false;
+
+    fields.forEach(function(field) {
+        const input = document.querySelector('[name="' + field.name + '"]');
+
+        if (input && !input.value.trim()) {
+            hasError = true;
+            showError(input, field.label);
+        } else if (input) {
+            clearError(input);
+        }
+    });
+
+    if (hasError) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        return false;
+    }
+});
+</script>
         </form>
     </div>
 </div>

@@ -21,7 +21,7 @@
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="simple-login-form">
+            <form method="POST" action="{{ route('login') }}" class="simple-login-form" novalidate>
                 @csrf
 
                 <div class="simple-login-field">
@@ -32,7 +32,6 @@
                         type="email"
                         name="email"
                         value="{{ old('email') }}"
-                        required
                         autofocus
                         autocomplete="username"
                         placeholder="john@example.com"
@@ -47,7 +46,6 @@
                         class="simple-login-input"
                         type="password"
                         name="password"
-                        required
                         autocomplete="current-password"
                         placeholder="••••••••"
                     >
@@ -75,6 +73,68 @@
                     Don't have an account?
                     <a href="{{ route('register') }}">Sign up</a>
                 </p>
+
+                <script>
+                    const loginForm = document.querySelector('.simple-login-form');
+
+                    function showLoginError(input, message) {
+                        input.classList.add('border-red-500');
+
+                        if (!input.parentNode.querySelector('.field-error')) {
+                            const error = document.createElement('p');
+                            error.className = 'field-error text-red-500 text-sm mt-1';
+                            error.textContent = message;
+                            input.parentNode.appendChild(error);
+                        }
+                    }
+
+                    function clearLoginError(input) {
+                        input.classList.remove('border-red-500');
+
+                        const error = input.parentNode.querySelector('.field-error');
+                        if (error) {
+                            error.remove();
+                        }
+                    }
+
+                    ['email', 'password'].forEach(function(name) {
+                        const input = document.querySelector('[name="' + name + '"]');
+
+                        if (input) {
+                            input.addEventListener('input', function() {
+                                if (input.value.trim()) {
+                                    clearLoginError(input);
+                                }
+                            });
+                        }
+                    });
+
+                    loginForm.addEventListener('submit', function(e) {
+                        const email = document.querySelector('[name="email"]');
+                        const password = document.querySelector('[name="password"]');
+
+                        let hasError = false;
+
+                        clearLoginError(email);
+                        clearLoginError(password);
+
+                        if (!email.value.trim()) {
+                            showLoginError(email, 'Email is required.');
+                            hasError = true;
+                        }
+
+                        if (!password.value.trim()) {
+                            showLoginError(password, 'Password is required.');
+                            hasError = true;
+                        }
+
+                        if (hasError) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
+                    });
+                </script>
             </form>
         </div>
 

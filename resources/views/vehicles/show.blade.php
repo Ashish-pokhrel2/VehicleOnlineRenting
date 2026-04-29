@@ -3,16 +3,15 @@
 @section('title', 'Vehicle Details')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-10">
+<div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div class="mb-8">
+        <div class="mb-6">
             <a href="{{ route('vehicles.index') }}" class="text-blue-600 font-semibold hover:underline">
                 Back to Vehicles
             </a>
         </div>
 
-        <!-- Loading and error states -->
         @if ($isLoading)
             <div class="mb-6 bg-white border border-gray-200 rounded-xl p-4 text-gray-500">
                 Loading vehicle details...
@@ -28,12 +27,19 @@
             <div class="lg:col-span-2 space-y-8">
 
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
-                    <img src="{{ asset($vehicleImages[0] ?? $vehicle->image) }}" alt="{{ $vehicle->name }}" class="w-full h-[300px] sm:h-[420px] object-cover">
+                    <div class="bg-gray-50">
+                        <img src="{{ asset($vehicleImages[0] ?? $vehicle->image) }}"
+                             alt="{{ $vehicle->name }}"
+                             class="w-full h-[300px] sm:h-[420px] object-contain">
+                    </div>
+
                     <div class="p-5">
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             @foreach ($vehicleImages as $image)
-                                <div class="rounded-xl overflow-hidden border border-gray-200">
-                                    <img src="{{ asset($image) }}" alt="{{ $vehicle->name }}" class="w-full h-24 object-cover">
+                                <div class="rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                    <img src="{{ asset($image) }}"
+                                         alt="{{ $vehicle->name }}"
+                                         class="w-full h-24 object-contain">
                                 </div>
                             @endforeach
                         </div>
@@ -62,7 +68,7 @@
                         <div class="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 min-w-[220px]">
                             <p class="text-sm text-gray-500">Daily Pricing</p>
                             <p class="mt-2 text-4xl font-bold text-blue-600">
-                                ${{ $vehicle->price_per_day }}
+                                Rs. {{ number_format($vehicle->price_per_day, 0) }}
                                 <span class="text-lg font-medium text-gray-500">/day</span>
                             </p>
                         </div>
@@ -132,14 +138,16 @@
             </div>
 
             <div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-2">
                     <h2 class="text-2xl font-semibold text-gray-900">Book This Vehicle</h2>
                     <p class="text-gray-500 mt-2">Reserve this vehicle and continue to the booking page.</p>
 
                     <div class="mt-6 space-y-4">
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                             <p class="text-sm text-gray-500">Price Per Day</p>
-                            <p class="mt-2 text-2xl font-bold text-blue-600">${{ $vehicle->price_per_day }}/day</p>
+                            <p class="mt-2 text-2xl font-bold text-blue-600">
+                                Rs. {{ number_format($vehicle->price_per_day, 0) }}/day
+                            </p>
                         </div>
 
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">

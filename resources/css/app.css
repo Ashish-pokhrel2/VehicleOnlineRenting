@@ -484,17 +484,17 @@ box-sizing:border-box;
 
 /* Vehicles */
 .vehicles-grid {
-    max-width: 1200px;
+    max-width: 1120px;   
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px;
+    gap: 22px;         
 }
 
 .vehicle-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 22px;
+    border-radius: 18px;
     overflow: hidden;
     cursor: pointer;
 }
@@ -506,7 +506,8 @@ box-sizing:border-box;
 .vehicle-image-wrapper img {
     width: 100%;
     height: 220px;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f8f9fa;
     display: block;
 }
 
@@ -523,7 +524,7 @@ box-sizing:border-box;
 }
 
 .vehicle-content {
-    padding: 22px;
+    padding: 18px;
 }
 
 .vehicle-header {
@@ -943,6 +944,8 @@ gap:28px;
 
 .page-card .vehicle-image-wrapper img {
     height: 164px;
+    object-fit: contain;
+    background: #f8f9fa;
 }
 
 .page-card .vehicle-content {
