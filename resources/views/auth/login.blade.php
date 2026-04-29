@@ -7,6 +7,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="simple-login-page">
+    @php
+        $selectedRole = $role ?? \App\Enums\UserRole::CUSTOMER;
+        $selectedRoleValue = $selectedRole->value;
+        $selectedLoginRoute = $loginRoute ?? 'login';
+    @endphp
 
     <div class="simple-login-wrapper">
         <div class="simple-login-logo-wrap">
@@ -17,12 +22,19 @@
 
         <div class="simple-login-card">
             <h1 class="simple-login-title">Welcome Back</h1>
-            <p class="simple-login-subtitle">Sign in to your account to continue</p>
+            <p class="simple-login-subtitle">Sign in as {{ ucfirst($selectedRoleValue) }} to continue</p>
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="simple-login-form" novalidate>
+            <div class="simple-login-row" style="margin-bottom: 1rem; gap: 0.75rem;">
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'customer' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'customer' ? '#fff' : '#475569' }};" href="{{ route('login') }}">Customer</a>
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'vendor' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'vendor' ? '#fff' : '#475569' }};" href="{{ route('vendor.login') }}">Vendor</a>
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'admin' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'admin' ? '#fff' : '#475569' }};" href="{{ route('admin.login') }}">Admin</a>
+            </div>
+
+            <form method="POST" action="{{ route($selectedLoginRoute) }}" class="simple-login-form">
                 @csrf
+                <input type="hidden" name="role" value="{{ $selectedRoleValue }}">
 
                 <div class="simple-login-field">
                     <label for="email" class="simple-login-label">Email</label>
@@ -73,68 +85,6 @@
                     Don't have an account?
                     <a href="{{ route('register') }}">Sign up</a>
                 </p>
-
-                <script>
-                    const loginForm = document.querySelector('.simple-login-form');
-
-                    function showLoginError(input, message) {
-                        input.classList.add('border-red-500');
-
-                        if (!input.parentNode.querySelector('.field-error')) {
-                            const error = document.createElement('p');
-                            error.className = 'field-error text-red-500 text-sm mt-1';
-                            error.textContent = message;
-                            input.parentNode.appendChild(error);
-                        }
-                    }
-
-                    function clearLoginError(input) {
-                        input.classList.remove('border-red-500');
-
-                        const error = input.parentNode.querySelector('.field-error');
-                        if (error) {
-                            error.remove();
-                        }
-                    }
-
-                    ['email', 'password'].forEach(function(name) {
-                        const input = document.querySelector('[name="' + name + '"]');
-
-                        if (input) {
-                            input.addEventListener('input', function() {
-                                if (input.value.trim()) {
-                                    clearLoginError(input);
-                                }
-                            });
-                        }
-                    });
-
-                    loginForm.addEventListener('submit', function(e) {
-                        const email = document.querySelector('[name="email"]');
-                        const password = document.querySelector('[name="password"]');
-
-                        let hasError = false;
-
-                        clearLoginError(email);
-                        clearLoginError(password);
-
-                        if (!email.value.trim()) {
-                            showLoginError(email, 'Email is required.');
-                            hasError = true;
-                        }
-
-                        if (!password.value.trim()) {
-                            showLoginError(password, 'Password is required.');
-                            hasError = true;
-                        }
-
-                        if (hasError) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return false;
-                        }
-                    });
-                </script>
             </form>
         </div>
 

@@ -63,6 +63,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('admin.vehicles');
         })->name('vehicles');
 
+        Route::get('/contact', function (Request $request) {
+            abort_unless($request->user()?->isAdmin(), 403);
+
+            return view('admin.contact');
+        })->name('contact');
+
         Route::get('/bookings', [DashboardController::class, 'bookings'])->name('bookings');
     });
 });

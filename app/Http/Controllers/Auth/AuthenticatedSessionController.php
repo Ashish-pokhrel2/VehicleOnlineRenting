@@ -2,50 +2,70 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
+    public function createCustomer(): View
     {
-        return view('auth.login');
+        return $this->createForRole(UserRole::CUSTOMER, 'login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function store(LoginRequest $request): RedirectResponse
+    public function createVendor(): View
     {
-        $request->authenticate();
-
-        $request->session()->regenerate();
-
-        if ($request->user()?->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard', absolute: false));
-        }
-
-        return redirect()->intended('/');
+        return $this->createForRole(UserRole::VENDOR, 'vendor.login');
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
+    public function createAdmin(): View
+    {
+        return $this->createForRole(UserRole::ADMIN, 'admin.login');
+    }
+
+    public function storeCustomer(LoginRequest $request): RedirectResponse
+    {
+        return $this->storeForRole($request, 'dashboard');
+    }
+
+    public function storeVendor(LoginRequest $request): RedirectResponse
+    {
+        return $this->storeForRole($request, 'dashboard');
+    }
+
+    public function storeAdmin(LoginRequest $request): RedirectResponse
+    {
+        return $this->storeForRole($request, 'admin.dashboard');
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        auth()->guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    private function createForRole(UserRole $role, string $loginRoute): View
+    {
+        return view('auth.login', [
+            'role' => $role,
+            'loginRoute' => $loginRoute,
+        ]);
+    }
+
+    private function storeForRole(LoginRequest $request, string $redirectRoute): RedirectResponse
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route($redirectRoute, absolute: false));
     }
 }

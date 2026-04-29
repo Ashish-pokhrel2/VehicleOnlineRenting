@@ -4,6 +4,7 @@
         ['label' => 'Users', 'route' => 'admin.users'],
         ['label' => 'Vehicles', 'route' => 'admin.vehicles'],
         ['label' => 'Bookings', 'route' => 'admin.bookings'],
+        ['label' => 'Contact', 'route' => 'admin.contact'],
     ];
 @endphp
 
@@ -33,12 +34,15 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 12 3l9 4.5M4.5 8.25V16.5L12 21l7.5-4.5V8.25M4.5 8.25 12 12.75l7.5-4.5" />
                     </svg>
+
                 @else
+
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="5" width="18" height="16" rx="2" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 3v4M8 3v4M3 11h18" />
                     </svg>
                 @endif
+
                 {{ $link['label'] }}
             </a>
         @endforeach

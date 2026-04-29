@@ -17,10 +17,28 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('login', fn () => redirect()->route('login'));
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::prefix('customer')->group(function () {
+        Route::get('login', [AuthenticatedSessionController::class, 'createCustomer'])
+            ->name('login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'storeCustomer']);
+    });
+
+    Route::prefix('vendor')->name('vendor.')->group(function () {
+        Route::get('login', [AuthenticatedSessionController::class, 'createVendor'])
+            ->name('login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'storeVendor']);
+    });
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('login', [AuthenticatedSessionController::class, 'createAdmin'])
+            ->name('login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'storeAdmin']);
+    });
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
