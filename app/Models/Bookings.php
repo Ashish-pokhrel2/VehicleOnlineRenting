@@ -17,6 +17,12 @@ class Bookings extends Model
         'vendor_id',
         'start_date',
         'end_date',
+        'pickup_time',
+        'full_name',
+        'phone',
+        'email',
+        'citizenship_id',
+        'special_request',
         'total_price',
         'status',
     ];

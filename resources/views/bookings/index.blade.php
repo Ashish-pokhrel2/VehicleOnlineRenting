@@ -94,7 +94,7 @@
                                 </button>
 
                             @elseif ($statusLabel === 'Pending')
-                                <a href="{{ route('bookings.create', $booking->vehicle) }}" class="booking-btn booking-btn-light">
+                                <a href="{{ route('bookings.edit', $booking) }}" class="booking-btn booking-btn-light">
                                     Modify Booking
                                 </a>
 

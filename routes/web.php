@@ -34,9 +34,11 @@ Route::middleware('auth')->group(function () {
 
     // Booking Create Page
     Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
+    Route::get('/bookings/{booking}/edit', [BookingPageController::class, 'edit'])->name('bookings.edit');
 
     // Booking Store Route
     Route::post('/bookings', [BookingPageController::class, 'store'])->name('bookings.page.store');
+    Route::patch('/bookings/{booking}', [BookingPageController::class, 'update'])->name('bookings.page.update');
 });
 
 // ===================== Authenticated Routes =====================

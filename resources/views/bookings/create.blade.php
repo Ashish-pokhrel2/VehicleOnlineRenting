@@ -38,8 +38,16 @@
             </div>
         @endif
 
-        <form id="bookingForm" method="POST" action="{{ route('bookings.page.store') }}" novalidate>
+        <form
+            id="bookingForm"
+            method="POST"
+            action="{{ $editingBooking ? route('bookings.page.update', $editingBooking) : route('bookings.page.store') }}"
+            novalidate
+        >
             @csrf
+            @if ($editingBooking)
+                @method('PATCH')
+            @endif
             <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -47,9 +55,9 @@
                 <div class="lg:col-span-2 space-y-8">
 
                     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-                        <h1 class="text-3xl font-bold text-gray-900">Book Vehicle</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $editingBooking ? 'Modify Booking' : 'Book Vehicle' }}</h1>
                         <p class="text-gray-500 mt-2">
-                            Complete the booking form below to reserve your selected vehicle.
+                            {{ $editingBooking ? 'Update your booking details below.' : 'Complete the booking form below to reserve your selected vehicle.' }}
                         </p>
                     </div>
 
@@ -93,7 +101,7 @@
                                 <input
                                     type="date"
                                     name="start_date"
-                                    value="{{ old('start_date') }}"
+                                    value="{{ old('start_date', $formDefaults['start_date']) }}"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                             </div>
@@ -103,7 +111,7 @@
                                 <input
                                     type="date"
                                     name="end_date"
-                                    value="{{ old('end_date') }}"
+                                    value="{{ old('end_date', $formDefaults['end_date']) }}"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                             </div>
@@ -132,7 +140,7 @@
                                 >
                                     <option value="">Select pickup time</option>
                                     @forelse ($pickupTimeSlots as $slot)
-                                        <option value="{{ $slot->label }}">{{ $slot->label }}</option>
+                                        <option value="{{ $slot->label }}" @selected(old('pickup_time', $formDefaults['pickup_time']) === $slot->label)>{{ $slot->label }}</option>
                                     @empty
                                         <option value="" disabled>No pickup times available</option>
                                     @endforelse
@@ -150,6 +158,7 @@
                                 <input
                                     type="text"
                                     name="full_name"
+                                    value="{{ old('full_name', $formDefaults['full_name'] ?? auth()->user()?->name) }}"
                                     placeholder="Enter your full name"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -160,6 +169,7 @@
                                 <input
                                     type="text"
                                     name="phone"
+                                    value="{{ old('phone', $formDefaults['phone'] ?? auth()->user()?->phone) }}"
                                     placeholder="Enter your phone number"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -170,6 +180,7 @@
                                 <input
                                     type="email"
                                     name="email"
+                                    value="{{ old('email', $formDefaults['email'] ?? auth()->user()?->email) }}"
                                     placeholder="Enter your email address"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -180,6 +191,7 @@
                                 <input
                                     type="text"
                                     name="citizenship_id"
+                                    value="{{ old('citizenship_id', $formDefaults['citizenship_id']) }}"
                                     placeholder="Enter your citizenship or ID number"
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
@@ -193,7 +205,7 @@
                                 rows="4"
                                 placeholder="Write any additional request here"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            ></textarea>
+                            >{{ old('special_request', $formDefaults['special_request']) }}</textarea>
                         </div>
                     </div>
 
@@ -257,12 +269,12 @@
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Estimated Days</span>
-                                <span class="font-semibold text-gray-900">{{ $estimatedDays }} days</span>
+                                <span id="estimatedDaysValue" class="font-semibold text-gray-900">{{ $estimatedDays }} days</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-semibold text-gray-900">Rs. {{ number_format($subtotal, 0) }}</span>
+                                <span id="subtotalValue" class="font-semibold text-gray-900">Rs. {{ number_format($subtotal, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
@@ -272,7 +284,7 @@
 
                             <div class="flex justify-between items-center pt-2">
                                 <span class="text-lg font-semibold text-gray-900">Total Price</span>
-                                <span class="text-2xl font-bold text-blue-600">Rs. {{ number_format($total, 0) }}</span>
+                                <span id="totalPriceValue" class="text-2xl font-bold text-blue-600">Rs. {{ number_format($total, 0) }}</span>
                             </div>
                         </div>
 
@@ -308,8 +320,21 @@
 
             </div>
 
-           <script>
+            <div
+                id="bookingPricingData"
+                data-default-estimated-days="{{ $estimatedDays }}"
+                data-price-per-day="{{ (float) $vehicle->price_per_day }}"
+                data-service-fee="{{ (float) $serviceFee }}"
+            ></div>
+
+            <script>
 const bookingForm = document.getElementById('bookingForm');
+const pricingData = document.getElementById('bookingPricingData');
+const startDateInput = document.querySelector('[name="start_date"]');
+const endDateInput = document.querySelector('[name="end_date"]');
+const estimatedDaysValue = document.getElementById('estimatedDaysValue');
+const subtotalValue = document.getElementById('subtotalValue');
+const totalPriceValue = document.getElementById('totalPriceValue');
 
 const fields = [
     { name: 'start_date', label: 'Pick-up Date' },
@@ -341,6 +366,56 @@ function clearError(input) {
     }
 }
 
+function parseDateInput(value) {
+    if (!value) {
+        return null;
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+
+    if (!year || !month || !day) {
+        return null;
+    }
+
+    return new Date(year, month - 1, day);
+}
+
+function getSelectedDays() {
+    const startDate = parseDateInput(startDateInput?.value);
+    const endDate = parseDateInput(endDateInput?.value);
+
+    if (!startDate || !endDate) {
+        return null;
+    }
+
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const rawDays = Math.floor((endDate - startDate) / millisecondsPerDay);
+
+    return Math.max(1, rawDays);
+}
+
+function formatCurrency(value) {
+    return 'Rs. ' + new Intl.NumberFormat('en-US').format(Math.round(value));
+}
+
+function updateBookingSummary() {
+    if (!pricingData || !estimatedDaysValue || !subtotalValue || !totalPriceValue) {
+        return;
+    }
+
+    const defaultEstimatedDays = Number(pricingData.dataset.defaultEstimatedDays) || 1;
+    const pricePerDay = Number(pricingData.dataset.pricePerDay) || 0;
+    const serviceFee = Number(pricingData.dataset.serviceFee) || 0;
+    const selectedDays = getSelectedDays();
+    const estimatedDays = selectedDays ?? defaultEstimatedDays;
+    const subtotal = pricePerDay * estimatedDays;
+    const totalPrice = subtotal + serviceFee;
+
+    estimatedDaysValue.textContent = estimatedDays + ' days';
+    subtotalValue.textContent = formatCurrency(subtotal);
+    totalPriceValue.textContent = formatCurrency(totalPrice);
+}
+
 fields.forEach(function(field) {
     const input = document.querySelector('[name="' + field.name + '"]');
 
@@ -358,6 +433,18 @@ fields.forEach(function(field) {
         });
     }
 });
+
+if (startDateInput) {
+    startDateInput.addEventListener('change', updateBookingSummary);
+    startDateInput.addEventListener('input', updateBookingSummary);
+}
+
+if (endDateInput) {
+    endDateInput.addEventListener('change', updateBookingSummary);
+    endDateInput.addEventListener('input', updateBookingSummary);
+}
+
+updateBookingSummary();
 
 bookingForm.addEventListener('submit', function(e) {
     let hasError = false;
