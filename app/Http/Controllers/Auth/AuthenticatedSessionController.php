@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
     public function storeCustomer(LoginRequest $request): RedirectResponse
     {
-        return $this->storeForRole($request, 'dashboard');
+         return $this->storeForPath($request, '/');
     }
 
     public function storeVendor(LoginRequest $request): RedirectResponse
@@ -60,12 +60,21 @@ class AuthenticatedSessionController extends Controller
         ]);
     }
 
-    private function storeForRole(LoginRequest $request, string $redirectRoute): RedirectResponse
-    {
-        $request->authenticate();
+   private function storeForRole(LoginRequest $request, string $redirectRoute): RedirectResponse
+{
+    $request->authenticate();
 
-        $request->session()->regenerate();
+    $request->session()->regenerate();
 
-        return redirect()->intended(route($redirectRoute, absolute: false));
-    }
+    return redirect()->intended(route($redirectRoute, absolute: false));
+}
+
+private function storeForPath(LoginRequest $request, string $path): RedirectResponse
+{
+    $request->authenticate();
+
+    $request->session()->regenerate();
+
+    return redirect()->intended($path);
+}
 }

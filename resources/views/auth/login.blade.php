@@ -32,7 +32,7 @@
                 <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'admin' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'admin' ? '#fff' : '#475569' }};" href="{{ route('admin.login') }}">Admin</a>
             </div>
 
-            <form method="POST" action="{{ route($selectedLoginRoute) }}" class="simple-login-form">
+          <form method="POST" action="{{ route($selectedLoginRoute) }}" class="simple-login-form" novalidate>
                 @csrf
                 <input type="hidden" name="role" value="{{ $selectedRoleValue }}">
 
@@ -58,7 +58,7 @@
                         class="simple-login-input"
                         type="password"
                         name="password"
-                        autocomplete="current-password"
+                        autocomplete="new-password"
                         placeholder="••••••••"
                     >
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -85,6 +85,35 @@
                     Don't have an account?
                     <a href="{{ route('register') }}">Sign up</a>
                 </p>
+              <script>
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+
+function clearLoginFieldError(input) {
+    input.classList.remove('border-red-500');
+
+    const fieldBox = input.closest('.simple-login-field');
+
+    fieldBox.querySelectorAll('.field-error').forEach(el => el.remove());
+    fieldBox.querySelectorAll('.text-red-500').forEach(el => el.remove());
+    fieldBox.querySelectorAll('.text-red-600').forEach(el => el.remove());
+    fieldBox.querySelectorAll('ul').forEach(el => el.remove());
+}
+
+[emailInput, passwordInput].forEach(function(input) {
+    input.addEventListener('input', function() {
+        if (input.value.trim() !== '') {
+            clearLoginFieldError(input);
+        }
+    });
+
+    input.addEventListener('change', function() {
+        if (input.value.trim() !== '') {
+            clearLoginFieldError(input);
+        }
+    });
+});
+</script>
             </form>
         </div>
 
