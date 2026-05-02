@@ -9,7 +9,10 @@ test('profile page is displayed', function () {
         ->actingAs($user)
         ->get('/profile');
 
-    $response->assertOk();
+    $response->assertOk()
+        ->assertSee('Profile Information')
+        ->assertSee('Update Password')
+        ->assertSee('Delete Account');
 });
 
 test('profile information can be updated', function () {
@@ -17,7 +20,9 @@ test('profile information can be updated', function () {
 
     $response = $this
         ->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
         ->patch('/profile', [
+            '_token' => 'test-token',
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
@@ -38,7 +43,9 @@ test('email verification status is unchanged when the email address is unchanged
 
     $response = $this
         ->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
         ->patch('/profile', [
+            '_token' => 'test-token',
             'name' => 'Test User',
             'email' => $user->email,
         ]);
@@ -55,7 +62,9 @@ test('user can delete their account', function () {
 
     $response = $this
         ->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
         ->delete('/profile', [
+            '_token' => 'test-token',
             'password' => 'password',
         ]);
 
@@ -72,8 +81,10 @@ test('correct password must be provided to delete account', function () {
 
     $response = $this
         ->actingAs($user)
+        ->withSession(['_token' => 'test-token'])
         ->from('/profile')
         ->delete('/profile', [
+            '_token' => 'test-token',
             'password' => 'wrong-password',
         ]);
 
@@ -82,4 +93,15 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+test('authenticated user sees nav badge linking to profile edit page', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('vehicles.index'));
+
+    $response->assertSuccessful()
+        ->assertSee('href="'.route('profile.edit').'"', false);
 });

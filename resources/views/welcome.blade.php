@@ -46,7 +46,7 @@
                 <h1>Find Your Perfect Ride</h1>
                 <p>Rent premium vehicles at the best prices. Easy booking, flexible options.</p>
 
-                <form id="searchForm" class="search-box">
+                <form id="searchForm" class="search-box" novalidate>
                     <div class="search-item search-item-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="search-input-icon">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -91,7 +91,21 @@
                 <div class="category-card"><div class="category-icon"></div><h3>Unavailable</h3><p>{{ $errorMessage }}</p></div>
             @else
                 @forelse ($typeCounts as $typeCount)
-                    <a href="{{ route('vehicles.index', ['type' => strtolower($typeCount['label'])]) }}" class="category-card category-card-link">
+                  @php
+$typeParam = strtolower($typeCount['label']);
+
+if ($typeParam === 'cars') {
+    $typeParam = 'car';
+} elseif ($typeParam === 'bikes') {
+    $typeParam = 'bike';
+} elseif ($typeParam === 'scooters') {
+    $typeParam = 'scooter';
+} elseif ($typeParam === 'buses') {
+    $typeParam = 'bus';
+}
+@endphp
+
+<a href="{{ route('vehicles.index', ['type' => $typeParam]) }}" class="category-card category-card-link">
                         <div class="category-icon-wrap">
                       @php $label = strtolower($typeCount['label']); @endphp
 
@@ -121,12 +135,13 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M7 9h3"/>
     </svg>
 
-@elseif($label === 'vans' || $label === 'van')
+@elseif($label === 'buses' || $label === 'bus')
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#3b5bdb" stroke-width="1.8" width="32" height="32">
-        <rect x="2" y="7" width="14" height="8" rx="2"></rect>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16 10h3l3 3v2h-6z"/>
-        <circle cx="6" cy="17" r="2"></circle>
-        <circle cx="18" cy="17" r="2"></circle>
+        <rect x="3" y="6" width="18" height="10" rx="2"></rect>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9h12"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12h12"/>
+        <circle cx="7" cy="18" r="2"></circle>
+        <circle cx="17" cy="18" r="2"></circle>
     </svg>
 
 @else
@@ -178,7 +193,7 @@
                                 <span>{{ $vehicle->fuel }}</span>
                             </div>
                             <div class="vehicle-footer">
-                                <div class="price">${{ $vehicle->price_per_day }}<span>/day</span></div>
+                            <div class="price">Rs. {{ number_format($vehicle->price_per_day, 0) }}<span>/day</span></div>
                                 <a href="{{ route('vehicles.show', $vehicle) }}" onclick="event.stopPropagation();">View Details →</a>
                             </div>
                         </div>
@@ -281,39 +296,135 @@
         const searchMessage = document.getElementById('searchMessage');
         const searchResults = document.getElementById('searchResults');
 
-        if (searchForm) {
-            searchForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-                const location = document.getElementById('location').value.trim();
-                const date = document.getElementById('date').value;
-                const vehicleType = document.getElementById('vehicle_type').value.trim();
-                searchMessage.innerHTML = 'Searching...';
-                searchResults.innerHTML = '';
-                try {
-                    const params = new URLSearchParams({ location, date, vehicle_type: vehicleType });
-                    const response = await fetch(`{{ route('vehicles.search.ajax') }}?${params.toString()}`, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Search failed.');
-                    searchMessage.innerHTML = '';
-                    if (!data.vehicles || data.vehicles.length === 0) {
-                        searchResults.innerHTML = `<div style="background:#fff;padding:20px;border-radius:16px;color:#111;max-width:1100px;margin:0 auto;"><p style="margin:0;font-weight:600;">No vehicles found.</p></div>`;
-                        return;
-                    }
-                    let html = `<div style="background:#fff;padding:24px;border-radius:20px;color:#111;max-width:1100px;margin:0 auto;"><h3 style="margin-bottom:20px;">Search Results</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,420px));justify-content:center;gap:20px;">`;
-                    data.vehicles.forEach(vehicle => {
-                        html += `<div style="border:1px solid #ddd;border-radius:16px;overflow:hidden;background:#fff;"><img src="${vehicle.image_url}" alt="${vehicle.name}" style="width:100%;height:220px;object-fit:cover;"><div style="padding:16px;text-align:left;"><h4 style="margin:0 0 12px 0;text-align:center;">${vehicle.name}</h4><p style="margin:0 0 10px 0;color:#111;"><strong>Type:</strong> ${vehicle.category ?? vehicle.type ?? 'N/A'}</p><p style="margin:0 0 10px 0;color:#111;"><strong>Location:</strong> ${vehicle.location ?? 'N/A'}</p><p style="margin:0 0 16px 0;color:#111;"><strong>Price:</strong> $${vehicle.price_per_day}/day</p><div style="text-align:center;"><a href="/vehicles/${vehicle.id}" style="display:inline-block;padding:10px 16px;background:#020826;color:#fff;text-decoration:none;border-radius:10px;">View Details</a></div></div></div>`;
-                    });
-                    html += `</div></div>`;
-                    searchResults.innerHTML = html;
-                } catch (error) {
-                    searchMessage.innerHTML = '';
-                    searchResults.innerHTML = `<div style="background:#fff;padding:20px;border-radius:16px;color:red;max-width:1100px;margin:0 auto;">Something went wrong while searching.</div>`;
+      if (searchForm) {
+        const locationInput = document.getElementById('location');
+const dateInput = document.getElementById('date');
+const vehicleTypeInput = document.getElementById('vehicle_type');
+
+function clearHomeSearchError() {
+    if (locationInput.value.trim()) {
+        locationInput.style.border = '1px solid #e5e7eb';
+    }
+
+    if (dateInput.value.trim()) {
+        dateInput.style.border = '1px solid #e5e7eb';
+    }
+
+    if (vehicleTypeInput.value.trim()) {
+        vehicleTypeInput.style.border = '1px solid #e5e7eb';
+    }
+
+    if (
+        locationInput.value.trim() &&
+        dateInput.value.trim() &&
+        vehicleTypeInput.value.trim()
+    ) {
+        searchMessage.innerHTML = '';
+        searchMessage.style.background = 'transparent';
+        searchMessage.style.padding = '0';
+        searchMessage.style.display = 'block';
+    }
+}
+
+[locationInput, dateInput, vehicleTypeInput].forEach(field => {
+    field.addEventListener('input', clearHomeSearchError);
+    field.addEventListener('change', clearHomeSearchError);
+});
+    searchForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const location = document.getElementById('location');
+        const date = document.getElementById('date');
+        const vehicleType = document.getElementById('vehicle_type');
+
+        let hasError = false;
+
+        [location, date, vehicleType].forEach(field => {
+            field.style.border = '1px solid #e5e7eb';
+        });
+
+        if (!location.value.trim()) {
+            location.style.border = '2px solid #ef4444';
+            hasError = true;
+        }
+
+        if (!date.value.trim()) {
+            date.style.border = '2px solid #ef4444';
+            hasError = true;
+        }
+
+        if (!vehicleType.value.trim()) {
+            vehicleType.style.border = '2px solid #ef4444';
+            hasError = true;
+        }
+
+        if (hasError) {
+            searchMessage.innerHTML = 'Please fill location, date and vehicle type before searching.';
+            searchMessage.style.color = '#ffffff';
+            searchMessage.style.background = '#dc2626';
+            searchMessage.style.padding = '12px 20px';
+            searchMessage.style.borderRadius = '12px';
+            searchMessage.style.display = 'inline-block';
+            searchResults.innerHTML = '';
+            return;
+        }
+
+        searchMessage.innerHTML = 'Searching...';
+        searchMessage.style.background = 'transparent';
+        searchResults.innerHTML = '';
+
+        try {
+            const params = new URLSearchParams({
+                location: location.value.trim(),
+                date: date.value,
+                vehicle_type: vehicleType.value.trim()
+            });
+
+            const response = await fetch(`{{ route('vehicles.search.ajax') }}?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || 'Search failed.');
+
+            searchMessage.innerHTML = '';
+
+            if (!data.vehicles || data.vehicles.length === 0) {
+                searchResults.innerHTML = `<div style="background:#fff;padding:20px;border-radius:16px;color:#111;max-width:1100px;margin:0 auto;"><p style="margin:0;font-weight:600;">No vehicles found.</p></div>`;
+                return;
+            }
+
+            let html = `<div style="background:#fff;padding:24px;border-radius:20px;color:#111;max-width:1100px;margin:0 auto;"><h3 style="margin-bottom:20px;">Search Results</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,420px));justify-content:center;gap:20px;">`;
+
+            data.vehicles.forEach(vehicle => {
+                html += `<div style="border:1px solid #ddd;border-radius:16px;overflow:hidden;background:#fff;">
+                    <img src="${vehicle.image_url}" alt="${vehicle.name}" style="width:100%;height:220px;object-fit:cover;">
+                    <div style="padding:16px;text-align:left;">
+                        <h4 style="margin:0 0 12px 0;text-align:center;">${vehicle.name}</h4>
+                        <p style="margin:0 0 10px 0;color:#111;"><strong>Type:</strong> ${vehicle.category ?? vehicle.type ?? 'N/A'}</p>
+                        <p style="margin:0 0 10px 0;color:#111;"><strong>Location:</strong> ${vehicle.location ?? 'N/A'}</p>
+                        <p style="margin:0 0 16px 0;color:#111;"><strong>Price:</strong> Rs. ${Number(vehicle.price_per_day).toLocaleString('en-US')}/day</p>
+                        <div style="text-align:center;">
+                            <a href="/vehicles/${vehicle.id}" style="display:inline-block;padding:10px 16px;background:#020826;color:#fff;text-decoration:none;border-radius:10px;">View Details</a>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+            searchResults.innerHTML = html;
+
+        } catch (error) {
+            searchMessage.innerHTML = '';
+            searchResults.innerHTML = `<div style="background:#fff;padding:20px;border-radius:16px;color:red;max-width:1100px;margin:0 auto;">Something went wrong while searching.</div>`;
         }
+    });
+}
     </script>
 </body>
 </html>

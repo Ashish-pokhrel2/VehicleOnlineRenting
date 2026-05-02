@@ -57,5 +57,16 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'phone' => '9800000000',
+                'country_code' => 'NP',
+                'role' => UserRole::ADMIN,
+                'password' => Hash::make('password'),
+            ]
+        );
     }
 }

@@ -9,9 +9,7 @@ class PickupTimeSlotController extends Controller
 {
     public function index(): JsonResponse
     {
-        $slots = PickupTimeSlot::query()
-            ->orderBy('sort_order')
-            ->get();
+        $slots = PickupTimeSlot::orderedWithDefaults();
 
         return response()->json([
             'success' => true,

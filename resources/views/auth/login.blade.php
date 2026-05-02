@@ -7,6 +7,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="simple-login-page">
+    @php
+        $selectedRole = $role ?? \App\Enums\UserRole::CUSTOMER;
+        $selectedRoleValue = $selectedRole->value;
+        $selectedLoginRoute = $loginRoute ?? 'login';
+    @endphp
 
     <div class="simple-login-wrapper">
         <div class="simple-login-logo-wrap">
@@ -17,12 +22,19 @@
 
         <div class="simple-login-card">
             <h1 class="simple-login-title">Welcome Back</h1>
-            <p class="simple-login-subtitle">Sign in to your account to continue</p>
+            <p class="simple-login-subtitle">Sign in as {{ ucfirst($selectedRoleValue) }} to continue</p>
 
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}" class="simple-login-form">
+            <div class="simple-login-row" style="margin-bottom: 1rem; gap: 0.75rem;">
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'customer' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'customer' ? '#fff' : '#475569' }};" href="{{ route('login') }}">Customer</a>
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'vendor' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'vendor' ? '#fff' : '#475569' }};" href="{{ route('vendor.login') }}">Vendor</a>
+                <a class="simple-login-btn" style="flex: 1; text-align: center; background: {{ $selectedRoleValue === 'admin' ? '#2563eb' : '#eef2ff' }}; color: {{ $selectedRoleValue === 'admin' ? '#fff' : '#475569' }};" href="{{ route('admin.login') }}">Admin</a>
+            </div>
+
+          <form method="POST" action="{{ route($selectedLoginRoute) }}" class="simple-login-form" novalidate>
                 @csrf
+                <input type="hidden" name="role" value="{{ $selectedRoleValue }}">
 
                 <div class="simple-login-field">
                     <label for="email" class="simple-login-label">Email</label>
@@ -32,7 +44,6 @@
                         type="email"
                         name="email"
                         value="{{ old('email') }}"
-                        required
                         autofocus
                         autocomplete="username"
                         placeholder="john@example.com"
@@ -47,8 +58,7 @@
                         class="simple-login-input"
                         type="password"
                         name="password"
-                        required
-                        autocomplete="current-password"
+                        autocomplete="new-password"
                         placeholder="••••••••"
                     >
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -75,6 +85,35 @@
                     Don't have an account?
                     <a href="{{ route('register') }}">Sign up</a>
                 </p>
+              <script>
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+
+function clearLoginFieldError(input) {
+    input.classList.remove('border-red-500');
+
+    const fieldBox = input.closest('.simple-login-field');
+
+    fieldBox.querySelectorAll('.field-error').forEach(el => el.remove());
+    fieldBox.querySelectorAll('.text-red-500').forEach(el => el.remove());
+    fieldBox.querySelectorAll('.text-red-600').forEach(el => el.remove());
+    fieldBox.querySelectorAll('ul').forEach(el => el.remove());
+}
+
+[emailInput, passwordInput].forEach(function(input) {
+    input.addEventListener('input', function() {
+        if (input.value.trim() !== '') {
+            clearLoginFieldError(input);
+        }
+    });
+
+    input.addEventListener('change', function() {
+        if (input.value.trim() !== '') {
+            clearLoginFieldError(input);
+        }
+    });
+});
+</script>
             </form>
         </div>
 
