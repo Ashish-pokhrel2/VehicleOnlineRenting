@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePageController;
+use App\Http\Controllers\VendorDashboardController;
+use App\Http\Controllers\VendorVehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -50,9 +52,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return to_route('admin.dashboard');
         }
 
+        if ($request->user()?->isVendor()) {
+            return to_route('vendor.dashboard');
+        }
+
         return view('dashboard');
     })->name('dashboard');
 
+    // Vendor Routes
+   Route::prefix('vendor')->name('vendor.')->group(function () {
+    Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/vehicles', [VendorVehicleController::class, 'index'])->name('vehicles.index');
+    Route::get('/vehicles/create', [VendorVehicleController::class, 'create'])->name('vehicles.create');
+    Route::post('/vehicles', [VendorVehicleController::class, 'store'])->name('vehicles.store');
+    Route::get('/vehicles/{vehicle}/edit', [VendorVehicleController::class, 'edit'])->name('vehicles.edit');
+    Route::patch('/vehicles/{vehicle}', [VendorVehicleController::class, 'update'])->name('vehicles.update');
+    Route::delete('/vehicles/{vehicle}', [VendorVehicleController::class, 'destroy'])->name('vehicles.destroy');
+});
+
+    // Admin Dashboard Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

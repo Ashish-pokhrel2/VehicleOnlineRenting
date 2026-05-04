@@ -101,7 +101,7 @@
                                 <button
                                     type="button"
                                     class="booking-btn booking-btn-danger"
-                                    onclick="if(confirm('Are you sure you want to cancel this booking?')) { this.closest('.booking-card').style.display='none'; }"
+                                    onclick="openCancelBookingModal(this, '{{ $booking->vehicle?->name }}', 'BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}')"
                                 >
                                     Cancel Booking
                                 </button>
@@ -124,6 +124,67 @@
         @endif
     </section>
 </main>
+
+<div id="cancelBookingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <h2 class="text-2xl font-bold text-gray-900">Cancel Booking?</h2>
+
+        <p class="mt-3 text-sm leading-6 text-gray-600">
+            Are you sure you want to cancel
+            <span id="cancelBookingName" class="font-semibold text-gray-900"></span>
+            <span id="cancelBookingId" class="font-semibold text-gray-900"></span>?
+            This booking will be removed from your visible list.
+        </p>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button
+                type="button"
+                onclick="closeCancelBookingModal()"
+                class="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+                Keep Booking
+            </button>
+
+            <button
+                type="button"
+                onclick="confirmCancelBooking()"
+                class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+            >
+                Yes, Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedBookingCard = null;
+
+    function openCancelBookingModal(button, vehicleName, bookingId) {
+        selectedBookingCard = button.closest('.booking-card');
+
+        document.getElementById('cancelBookingName').textContent = vehicleName || 'this booking';
+        document.getElementById('cancelBookingId').textContent = bookingId ? '(' + bookingId + ')' : '';
+
+        const modal = document.getElementById('cancelBookingModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeCancelBookingModal() {
+        const modal = document.getElementById('cancelBookingModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        selectedBookingCard = null;
+    }
+
+    function confirmCancelBooking() {
+        if (selectedBookingCard) {
+            selectedBookingCard.style.display = 'none';
+        }
+
+        closeCancelBookingModal();
+    }
+</script>
 
 </body>
 </html>
