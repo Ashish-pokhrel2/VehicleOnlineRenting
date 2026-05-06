@@ -61,16 +61,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Vendor Routes
-   Route::prefix('vendor')->name('vendor.')->group(function () {
-    Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
+    Route::prefix('vendor')->name('vendor.')->group(function () {
+        Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/vehicles', [VendorVehicleController::class, 'index'])->name('vehicles.index');
-    Route::get('/vehicles/create', [VendorVehicleController::class, 'create'])->name('vehicles.create');
-    Route::post('/vehicles', [VendorVehicleController::class, 'store'])->name('vehicles.store');
-    Route::get('/vehicles/{vehicle}/edit', [VendorVehicleController::class, 'edit'])->name('vehicles.edit');
-    Route::patch('/vehicles/{vehicle}', [VendorVehicleController::class, 'update'])->name('vehicles.update');
-    Route::delete('/vehicles/{vehicle}', [VendorVehicleController::class, 'destroy'])->name('vehicles.destroy');
-});
+        Route::get('/vehicles', [VendorVehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/create', [VendorVehicleController::class, 'create'])->name('vehicles.create');
+        Route::post('/vehicles', [VendorVehicleController::class, 'store'])->name('vehicles.store');
+        Route::get('/vehicles/{vehicle}/edit', [VendorVehicleController::class, 'edit'])->name('vehicles.edit');
+        Route::patch('/vehicles/{vehicle}', [VendorVehicleController::class, 'update'])->name('vehicles.update');
+        Route::delete('/vehicles/{vehicle}', [VendorVehicleController::class, 'destroy'])->name('vehicles.destroy');
+    });
 
     // Admin Dashboard Routes
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -78,6 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/users', [DashboardController::class, 'users'])->name('users');
         Route::patch('/users/{user}/status', [DashboardController::class, 'updateUserStatus'])->name('users.status');
+
+        Route::get('/vendors', [DashboardController::class, 'vendors'])->name('vendors');
+        Route::get('/vendors/{vendor}', [DashboardController::class, 'showVendor'])->name('vendors.show');
 
         Route::get('/vehicles', function (Request $request) {
             abort_unless($request->user()?->isAdmin(), 403);
