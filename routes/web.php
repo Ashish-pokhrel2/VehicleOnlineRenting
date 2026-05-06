@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     // Booking Store Route
     Route::post('/bookings', [BookingPageController::class, 'store'])->name('bookings.page.store');
     Route::patch('/bookings/{booking}', [BookingPageController::class, 'update'])->name('bookings.page.update');
+    Route::patch('/bookings/{booking}/cancel', [BookingPageController::class, 'cancel'])->name('bookings.page.cancel');
 });
 
 // ===================== Authenticated Routes =====================
