@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>VehicleRent - My Bookings</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -11,6 +12,46 @@
 <body class="home-body">
 
 @include('partials.navbar')
+
+<script>
+async function cancelBooking(event, bookingId) {
+    event.preventDefault();
+    
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+        return;
+    }
+    
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        const response = await fetch(`/bookings/${bookingId}/cancel`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+        });
+        
+        const text = await response.text();
+        
+        if (!response.ok) {
+            throw new Error(`Failed to cancel booking (Status: ${response.status})`);
+        }
+        
+        const data = JSON.parse(text);
+        
+        if (data.success) {
+            alert('Booking cancelled successfully');
+            location.reload();
+        }
+    } catch (error) {
+        alert('Failed to cancel booking: ' + error.message);
+    }
+}
+</script>
 
 <main class="bookings-page-wrapper">
     <section class="bookings-page-header">
@@ -101,7 +142,7 @@
                                 <button
                                     type="button"
                                     class="booking-btn booking-btn-danger"
-                                    onclick="if(confirm('Are you sure you want to cancel this booking?')) { this.closest('.booking-card').style.display='none'; }"
+                                    onclick="cancelBooking(event, {{ $booking->id }})"
                                 >
                                     Cancel Booking
                                 </button>
