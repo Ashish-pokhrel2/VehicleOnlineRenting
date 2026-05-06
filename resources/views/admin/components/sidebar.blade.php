@@ -2,6 +2,7 @@
     $links = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
         ['label' => 'Users', 'route' => 'admin.users'],
+        ['label' => 'Vendors', 'route' => 'admin.vendors'],
         ['label' => 'Vehicles', 'route' => 'admin.vehicles'],
         ['label' => 'Bookings', 'route' => 'admin.bookings'],
         ['label' => 'Contact', 'route' => 'admin.contact'],
@@ -29,6 +30,10 @@
                         <circle cx="9" cy="7" r="4" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                @elseif ($link['route'] === 'admin.vendors')
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 @elseif ($link['route'] === 'admin.vehicles')
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

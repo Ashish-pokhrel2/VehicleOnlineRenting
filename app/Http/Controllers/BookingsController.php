@@ -68,7 +68,7 @@ class BookingsController extends Controller
     {
         $user = auth()->user();
 
-        if ($booking->customer_id !== $user->id && $booking->vendor_id !== $user->id) {
+        if (! $user || ($booking->customer_id !== $user->id && $booking->vendor_id !== $user->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized to view this booking',
@@ -89,7 +89,7 @@ class BookingsController extends Controller
 
         $user = auth()->user();
 
-        if ($booking->vendor_id !== $user->id && $booking->customer_id !== $user->id) {
+        if (! $user || ($booking->vendor_id !== $user->id && $booking->customer_id !== $user->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized to update this booking',

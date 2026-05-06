@@ -8,6 +8,7 @@ use App\Models\BookingSetting;
 use App\Models\PickupTimeSlot;
 use App\Models\Vehicles;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -131,6 +132,22 @@ class BookingPageController extends Controller
         return redirect()
             ->route('user.bookings')
             ->with('success', 'Booking updated successfully.');
+    }
+
+    // Handle cancellation of a pending booking via AJAX
+    public function cancel(Request $request, Bookings $booking): JsonResponse
+    {
+        abort_unless(
+            $booking->customer_id === auth()->id() && $booking->status === BookingStatus::PENDING,
+            Response::HTTP_FORBIDDEN
+        );
+
+        $booking->update(['status' => BookingStatus::CANCELLED]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking cancelled successfully.',
+        ]);
     }
 
     private function renderBookingForm(Request $request, Vehicles $vehicle, ?Bookings $booking = null): View
