@@ -8,6 +8,7 @@ use App\Models\BookingSetting;
 use App\Models\PickupTimeSlot;
 use App\Models\Vehicles;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,6 +19,8 @@ class BookingPageController extends Controller
     // Display all bookings for the authenticated user
     public function index(): View
     {
+        $this->ensureCustomer();
+
         $bookings = collect();
         $errorMessage = null;
 
@@ -52,12 +55,16 @@ class BookingPageController extends Controller
     // Display the booking creation page for a selected vehicle
     public function create(Request $request, Vehicles $vehicle): View
     {
+        $this->ensureCustomer();
+
         return $this->renderBookingForm($request, $vehicle);
     }
 
     // Display the booking modification page for an existing booking
     public function edit(Request $request, Bookings $booking): View
     {
+        $this->ensureCustomer();
+
         abort_unless(
             $booking->customer_id === auth()->id() && $booking->status === BookingStatus::PENDING,
             Response::HTTP_FORBIDDEN
@@ -71,6 +78,8 @@ class BookingPageController extends Controller
     // Handle booking form submission and save booking data
     public function store(Request $request): RedirectResponse
     {
+        $this->ensureCustomer();
+
         // Validate required booking form inputs
         $validated = $this->validateBookingInput($request);
 
@@ -104,6 +113,8 @@ class BookingPageController extends Controller
     // Handle pending booking modification and save updated booking data
     public function update(Request $request, Bookings $booking): RedirectResponse
     {
+        $this->ensureCustomer();
+
         abort_unless(
             $booking->customer_id === auth()->id() && $booking->status === BookingStatus::PENDING,
             Response::HTTP_FORBIDDEN
@@ -131,6 +142,24 @@ class BookingPageController extends Controller
         return redirect()
             ->route('user.bookings')
             ->with('success', 'Booking updated successfully.');
+    }
+
+    // Handle cancellation of a pending booking via AJAX
+    public function cancel(Request $request, Bookings $booking): JsonResponse
+    {
+        $this->ensureCustomer();
+
+        abort_unless(
+            $booking->customer_id === auth()->id() && $booking->status === BookingStatus::PENDING,
+            Response::HTTP_FORBIDDEN
+        );
+
+        $booking->update(['status' => BookingStatus::CANCELLED]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking cancelled successfully.',
+        ]);
     }
 
     private function renderBookingForm(Request $request, Vehicles $vehicle, ?Bookings $booking = null): View
@@ -230,5 +259,10 @@ class BookingPageController extends Controller
         }
 
         return $defaultDays;
+    }
+
+    private function ensureCustomer(): void
+    {
+        abort_unless(auth()->user()?->isCustomer(), Response::HTTP_FORBIDDEN);
     }
 }

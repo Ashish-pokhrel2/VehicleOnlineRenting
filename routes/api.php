@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\BookingSettingController;
 use App\Http\Controllers\BookingsController;
+use App\Http\Controllers\BookingSettingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PickupTimeSlotController;
 use App\Http\Controllers\ReviewsController;
 use App\Http\Controllers\VehiclesController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum,web')->group(function () {
     // Vehicles
     Route::apiResource('vehicles', VehiclesController::class);
 
-    // Bookings
-    Route::apiResource('bookings', BookingsController::class)->except(['update']);
+    // Bookings - Define custom route BEFORE apiResource so it has priority
     Route::patch('bookings/{booking}/status', [BookingsController::class, 'updateStatus']);
+    Route::apiResource('bookings', BookingsController::class)->except(['update']);
 
     // Reviews
     Route::apiResource('reviews', ReviewsController::class)->only(['index', 'store', 'show', 'destroy']);

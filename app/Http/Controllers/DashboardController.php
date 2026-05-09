@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Enums\UserRole;
 use App\Models\Bookings;
 use App\Models\BookingSettlement;
+use App\Models\Reviews;
 use App\Models\User;
 use App\Models\Vehicles;
 use Illuminate\Http\RedirectResponse;
@@ -179,6 +180,186 @@ class DashboardController extends Controller
         return back()->with([
             'statusMessage' => $message,
             'statusVariant' => $isActivating ? 'success' : 'danger',
+        ]);
+    }
+
+    public function vendors(Request $request): View
+    {
+        $user = $request->user();
+        abort_unless($user?->isAdmin(), Response::HTTP_FORBIDDEN);
+
+        $search = trim((string) $request->string('search')->value());
+
+        // Get all vendors with their vehicles and bookings
+        $vendors = User::query()
+            ->where('role', UserRole::VENDOR)
+            ->with([
+                'vehicles:id,vendor_id,name,available',
+                'vendorBookings:id,vendor_id,status,total_price',
+                'vendorReviews:id,vendor_id,rating',
+            ])
+            ->when(
+                $search !== '',
+                fn ($query) => $query->where(function ($subQuery) use ($search) {
+                    $subQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                })
+            )
+            ->orderBy('name')
+            ->get()
+            ->map(function (User $vendor) {
+                $bookings = $vendor->vendorBookings;
+                $totalBookings = $bookings->count();
+                $confirmedBookings = $bookings->where('status', BookingStatus::CONFIRMED)->count();
+                $completedBookings = $bookings->where('status', BookingStatus::COMPLETED)->count();
+                $cancelledBookings = $bookings->where('status', BookingStatus::CANCELLED)->count();
+                $totalRevenue = (float) $bookings->sum('total_price');
+
+                $acceptRate = $totalBookings > 0
+                    ? round(($confirmedBookings / $totalBookings) * 100, 2)
+                    : 0;
+
+                $cancelRate = $totalBookings > 0
+                    ? round(($cancelledBookings / $totalBookings) * 100, 2)
+                    : 0;
+
+                $completionRate = $totalBookings > 0
+                    ? round(($completedBookings / $totalBookings) * 100, 2)
+                    : 0;
+
+                $avgRating = $vendor->vendorReviews->count() > 0
+                    ? round($vendor->vendorReviews->avg('rating'), 2)
+                    : 0;
+
+                return [
+                    'id' => $vendor->id,
+                    'name' => $vendor->name,
+                    'email' => $vendor->email,
+                    'phone' => $vendor->phone,
+                    'status' => $vendor->status,
+                    'joinedDate' => $vendor->joined_date?->format('M d, Y') ?? 'N/A',
+                    'vehicleCount' => $vendor->vehicles->count(),
+                    'activeVehicles' => $vendor->vehicles->where('available', true)->count(),
+                    'totalBookings' => $totalBookings,
+                    'confirmedBookings' => $confirmedBookings,
+                    'completedBookings' => $completedBookings,
+                    'cancelledBookings' => $cancelledBookings,
+                    'totalRevenue' => $totalRevenue,
+                    'acceptRate' => $acceptRate,
+                    'cancelRate' => $cancelRate,
+                    'completionRate' => $completionRate,
+                    'reviewCount' => $vendor->vendorReviews->count(),
+                    'avgRating' => $avgRating,
+                ];
+            });
+
+        // Calculate overall statistics
+        $totalVendors = User::where('role', UserRole::VENDOR)->count();
+        $activeVendors = User::where('role', UserRole::VENDOR)
+            ->where('status', 'active')
+            ->count();
+        $totalVendorRevenue = (float) Bookings::query()->sum('total_price');
+
+        return view('admin.vendors', [
+            'vendors' => $vendors,
+            'search' => $search,
+            'stats' => [
+                'totalVendors' => $totalVendors,
+                'activeVendors' => $activeVendors,
+                'totalVendorRevenue' => $totalVendorRevenue,
+            ],
+        ]);
+    }
+
+    public function showVendor(Request $request, User $vendor): View
+    {
+        $admin = $request->user();
+        abort_unless($admin?->isAdmin(), Response::HTTP_FORBIDDEN);
+        abort_unless($vendor->isVendor(), Response::HTTP_NOT_FOUND);
+
+        // Get vendor with all relationships
+        $vendor->load([
+            'vehicles:id,vendor_id,name,available,price_per_day,rating,reviews',
+            'vendorBookings:id,vendor_id,customer_id,vehicle_id,start_date,end_date,status,total_price,created_at',
+            'vendorReviews:id,vendor_id,customer_id,vehicle_id,rating,comment,created_at',
+        ]);
+
+        // Calculate booking statistics
+        $bookings = $vendor->vendorBookings;
+        $totalBookings = $bookings->count();
+        $confirmedBookings = $bookings->where('status', BookingStatus::CONFIRMED)->count();
+        $completedBookings = $bookings->where('status', BookingStatus::COMPLETED)->count();
+        $cancelledBookings = $bookings->where('status', BookingStatus::CANCELLED)->count();
+        $pendingBookings = $bookings->where('status', BookingStatus::PENDING)->count();
+
+        $totalRevenue = (float) $bookings->sum('total_price');
+        $avgRevenuePerBooking = $totalBookings > 0 ? $totalRevenue / $totalBookings : 0;
+
+        $acceptRate = $totalBookings > 0 ? round(($confirmedBookings / $totalBookings) * 100, 2) : 0;
+        $cancelRate = $totalBookings > 0 ? round(($cancelledBookings / $totalBookings) * 100, 2) : 0;
+        $completionRate = $totalBookings > 0 ? round(($completedBookings / $totalBookings) * 100, 2) : 0;
+
+        // Get detailed bookings data
+        $recentBookings = $bookings->sortByDesc('created_at')->take(10)->values();
+
+        // Calculate review statistics
+        $reviews = $vendor->vendorReviews;
+        $avgRating = $reviews->count() > 0 ? round($reviews->avg('rating'), 2) : 0;
+        $totalReviews = $reviews->count();
+        $ratingDistribution = [
+            '5' => $reviews->where('rating', 5)->count(),
+            '4' => $reviews->where('rating', 4)->count(),
+            '3' => $reviews->where('rating', 3)->count(),
+            '2' => $reviews->where('rating', 2)->count(),
+            '1' => $reviews->where('rating', 1)->count(),
+        ];
+
+        // Get recent reviews
+        $recentReviews = $reviews->sortByDesc('created_at')->take(5)->values();
+
+        // Vehicle performance metrics
+        $vehicleMetrics = $vendor->vehicles->map(function (Vehicles $vehicle) {
+            $vehicleBookings = Bookings::where('vehicle_id', $vehicle->id)->get();
+            $vehicleRevenue = (float) $vehicleBookings->sum('total_price');
+
+            return [
+                'id' => $vehicle->id,
+                'name' => $vehicle->name,
+                'available' => $vehicle->available,
+                'pricePerDay' => $vehicle->price_per_day,
+                'rating' => $vehicle->rating,
+                'reviews' => $vehicle->reviews,
+                'bookingCount' => $vehicleBookings->count(),
+                'revenue' => $vehicleRevenue,
+            ];
+        })->sortByDesc('revenue')->values();
+
+        return view('admin.vendor-details', [
+            'vendor' => $vendor,
+            'stats' => [
+                'totalBookings' => $totalBookings,
+                'confirmedBookings' => $confirmedBookings,
+                'completedBookings' => $completedBookings,
+                'cancelledBookings' => $cancelledBookings,
+                'pendingBookings' => $pendingBookings,
+                'totalRevenue' => $totalRevenue,
+                'avgRevenuePerBooking' => $avgRevenuePerBooking,
+                'acceptRate' => $acceptRate,
+                'cancelRate' => $cancelRate,
+                'completionRate' => $completionRate,
+                'totalVehicles' => $vendor->vehicles->count(),
+                'activeVehicles' => $vendor->vehicles->where('available', true)->count(),
+            ],
+            'reviewStats' => [
+                'totalReviews' => $totalReviews,
+                'avgRating' => $avgRating,
+                'ratingDistribution' => $ratingDistribution,
+            ],
+            'recentBookings' => $recentBookings,
+            'recentReviews' => $recentReviews,
+            'vehicleMetrics' => $vehicleMetrics,
         ]);
     }
 }
