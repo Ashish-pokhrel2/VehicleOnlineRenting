@@ -41,6 +41,7 @@
         <aside class="w-64 min-h-[calc(100vh-64px)] bg-white border-r border-gray-200 px-5 py-6">
             <nav class="space-y-2">
 
+                <!-- Dashboard -->
                 <a href="{{ route('vendor.dashboard') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
                    {{ request()->routeIs('vendor.dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
@@ -50,16 +51,20 @@
                     Dashboard
                 </a>
 
+                <!-- Vehicles -->
                 <a href="{{ route('vendor.vehicles.index') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100">
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                   {{ request()->routeIs('vendor.vehicles.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2h-3l-2-2H7a2 2 0 00-2 2v8m15 0l-2 6H6l-2-6h16z" />
                     </svg>
                     Vehicles
                 </a>
 
-                <a href="#"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100">
+                <!-- Bookings (FIXED ✅) -->
+                <a href="{{ route('vendor.bookings.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                   {{ request()->routeIs('vendor.bookings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 11h14M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
                     </svg>

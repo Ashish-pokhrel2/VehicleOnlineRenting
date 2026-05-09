@@ -5,47 +5,36 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePageController;
+use App\Http\Controllers\VendorBookingController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\VendorVehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 // ===================== Public Routes =====================
 
-// Home Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// AJAX Search Route
-Route::get('/vehicles/search/ajax', [VehiclePageController::class, 'ajaxSearch'])->name('vehicles.search.ajax');
+Route::get('/vehicles/search/ajax', [VehiclePageController::class, 'ajaxSearch'])
+    ->name('vehicles.search.ajax');
+
+// ===================== Customer Routes =====================
 
 Route::middleware('auth')->group(function () {
-    // Vehicles Listing Page
     Route::get('/vehicles', [VehiclePageController::class, 'index'])->name('vehicles.index');
-
-    // Vehicle Detail Page
     Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])->name('vehicles.show');
 
-    // My Bookings Page
     Route::get('/my-bookings', [BookingPageController::class, 'index'])->name('user.bookings');
 
-    // Booking Create Page
     Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])->name('bookings.create');
     Route::get('/bookings/{booking}/edit', [BookingPageController::class, 'edit'])->name('bookings.edit');
 
-    // Booking Store Route
     Route::post('/bookings', [BookingPageController::class, 'store'])->name('bookings.page.store');
     Route::patch('/bookings/{booking}', [BookingPageController::class, 'update'])->name('bookings.page.update');
 });
 
 // ===================== Authenticated Routes =====================
 
-// Dashboard (Accessible only after login and email verification)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function (Request $request) {
         if ($request->user()?->isAdmin()) {
@@ -59,19 +48,70 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    // Vendor Routes
-   Route::prefix('vendor')->name('vendor.')->group(function () {
-    Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
+    // ===================== Vendor Routes =====================
+    Route::prefix('vendor')->name('vendor.')->group(function () {
+        Route::get('/dashboard', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
 
-    Route::get('/vehicles', [VendorVehicleController::class, 'index'])->name('vehicles.index');
-    Route::get('/vehicles/create', [VendorVehicleController::class, 'create'])->name('vehicles.create');
-    Route::post('/vehicles', [VendorVehicleController::class, 'store'])->name('vehicles.store');
-    Route::get('/vehicles/{vehicle}/edit', [VendorVehicleController::class, 'edit'])->name('vehicles.edit');
-    Route::patch('/vehicles/{vehicle}', [VendorVehicleController::class, 'update'])->name('vehicles.update');
-    Route::delete('/vehicles/{vehicle}', [VendorVehicleController::class, 'destroy'])->name('vehicles.destroy');
-});
+            return app(VendorDashboardController::class)->index();
+        })->name('dashboard');
 
-    // Admin Dashboard Routes
+        Route::get('/vehicles', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->index();
+        })->name('vehicles.index');
+
+        Route::get('/vehicles/create', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->create();
+        })->name('vehicles.create');
+
+        Route::post('/vehicles', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->store($request);
+        })->name('vehicles.store');
+
+        Route::get('/vehicles/{vehicle}/edit', function (Request $request, $vehicle) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->edit(\App\Models\Vehicles::findOrFail($vehicle));
+        })->name('vehicles.edit');
+
+        Route::patch('/vehicles/{vehicle}', function (Request $request, $vehicle) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->update($request, \App\Models\Vehicles::findOrFail($vehicle));
+        })->name('vehicles.update');
+
+        Route::delete('/vehicles/{vehicle}', function (Request $request, $vehicle) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorVehicleController::class)->destroy(\App\Models\Vehicles::findOrFail($vehicle));
+        })->name('vehicles.destroy');
+
+        Route::get('/bookings', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorBookingController::class)->index();
+        })->name('bookings.index');
+
+        Route::patch('/bookings/{booking}/confirm', function (Request $request, $booking) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorBookingController::class)->confirm(\App\Models\Bookings::findOrFail($booking));
+        })->name('bookings.confirm');
+
+        Route::patch('/bookings/{booking}/reject', function (Request $request, $booking) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorBookingController::class)->reject(\App\Models\Bookings::findOrFail($booking));
+        })->name('bookings.reject');
+    });
+
+    // ===================== Admin Routes =====================
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -94,7 +134,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-// Profile Management Routes
+// ===================== Profile Management Routes =====================
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -102,4 +143,5 @@ Route::middleware('auth')->group(function () {
 });
 
 // ===================== Authentication Routes =====================
+
 require __DIR__.'/auth.php';
