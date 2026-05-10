@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePageController;
 use App\Http\Controllers\VendorBookingController;
+use App\Http\Controllers\VendorContactController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\VendorVehicleController;
 use Illuminate\Http\Request;
@@ -92,48 +93,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('vendor')->name('vendor.')->group(function () {
 
         Route::get('/dashboard', function (Request $request) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorDashboardController::class)->index();
-
         })->name('dashboard');
 
         Route::get('/vehicles', function (Request $request) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)->index();
-
         })->name('vehicles.index');
 
         Route::get('/vehicles/create', function (Request $request) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)->create();
-
         })->name('vehicles.create');
 
         Route::post('/vehicles', function (Request $request) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)->store($request);
-
         })->name('vehicles.store');
 
         Route::get('/vehicles/{vehicle}/edit', function (Request $request, $vehicle) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)
                 ->edit(\App\Models\Vehicles::findOrFail($vehicle));
-
         })->name('vehicles.edit');
 
         Route::patch('/vehicles/{vehicle}', function (Request $request, $vehicle) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)
@@ -141,51 +131,40 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     $request,
                     \App\Models\Vehicles::findOrFail($vehicle)
                 );
-
         })->name('vehicles.update');
 
         Route::delete('/vehicles/{vehicle}', function (Request $request, $vehicle) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)
                 ->destroy(\App\Models\Vehicles::findOrFail($vehicle));
-
         })->name('vehicles.destroy');
 
         Route::get('/bookings', function (Request $request) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorBookingController::class)->index();
-
         })->name('bookings.index');
 
         Route::patch('/bookings/{booking}/confirm', function (Request $request, $booking) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorBookingController::class)
                 ->confirm(\App\Models\Bookings::findOrFail($booking));
-
         })->name('bookings.confirm');
 
         Route::patch('/bookings/{booking}/reject', function (Request $request, $booking) {
-
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorBookingController::class)
                 ->reject(\App\Models\Bookings::findOrFail($booking));
-
         })->name('bookings.reject');
 
-        Route::get('/contact', function (Request $request) {
+        Route::get('/contact', [VendorContactController::class, 'index'])
+            ->name('contact');
 
-            abort_unless($request->user()?->isVendor(), 403);
-
-            return view('vendor.contact');
-
-        })->name('contact');
+        Route::post('/contact', [VendorContactController::class, 'store'])
+            ->name('contact.store');
     });
 
     // ===================== Admin Routes =====================
@@ -208,19 +187,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('vendors.show');
 
         Route::get('/vehicles', function (Request $request) {
-
             abort_unless($request->user()?->isAdmin(), 403);
 
             return view('admin.vehicles');
-
         })->name('vehicles');
 
         Route::get('/contact', function (Request $request) {
-
             abort_unless($request->user()?->isAdmin(), 403);
 
             return view('admin.contact');
-
         })->name('contact');
 
         Route::get('/bookings', [DashboardController::class, 'bookings'])

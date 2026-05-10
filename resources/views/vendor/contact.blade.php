@@ -46,13 +46,17 @@
                         </div>
                     </div>
 
-                    <!-- Success Message -->
-                    <div id="successMessage"
-                         class="mb-5 hidden rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-700">
-                        Message sent successfully. Our support team will contact you soon.
-                    </div>
+                    @if (session('success'))
+                        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-700">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
-                    <form id="contactForm" class="space-y-5" novalidate>
+                    <form method="POST"
+                          action="{{ route('vendor.contact.store') }}"
+                          class="space-y-5">
+
+                        @csrf
 
                         <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
@@ -63,12 +67,17 @@
 
                                 <input type="text"
                                        id="name"
-                                       class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       name="name"
+                                       value="{{ old('name') }}"
+                                       class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                                       @error('name') border-red-400 @else border-gray-300 @enderror"
                                        placeholder="Enter your full name">
 
-                                <p id="nameError" class="mt-2 hidden text-sm text-red-500">
-                                    Full name is required.
-                                </p>
+                                @error('name')
+                                    <p class="mt-2 text-sm text-red-500">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
                             </div>
 
                             <div>
@@ -78,12 +87,17 @@
 
                                 <input type="email"
                                        id="email"
-                                       class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                       name="email"
+                                       value="{{ old('email') }}"
+                                       class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                                       @error('email') border-red-400 @else border-gray-300 @enderror"
                                        placeholder="vendor@example.com">
 
-                                <p id="emailError" class="mt-2 hidden text-sm text-red-500">
-                                    Valid email address is required.
-                                </p>
+                                @error('email')
+                                    <p class="mt-2 text-sm text-red-500">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
                             </div>
                         </div>
 
@@ -94,12 +108,17 @@
 
                             <input type="text"
                                    id="subject"
-                                   class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                   name="subject"
+                                   value="{{ old('subject') }}"
+                                   class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                                   @error('subject') border-red-400 @else border-gray-300 @enderror"
                                    placeholder="Enter message subject">
 
-                            <p id="subjectError" class="mt-2 hidden text-sm text-red-500">
-                                Subject is required.
-                            </p>
+                            @error('subject')
+                                <p class="mt-2 text-sm text-red-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
 
                         <div>
@@ -108,13 +127,17 @@
                             </label>
 
                             <textarea id="message"
+                                      name="message"
                                       rows="5"
-                                      class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                      placeholder="Write your message here..."></textarea>
+                                      class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                                      @error('message') border-red-400 @else border-gray-300 @enderror"
+                                      placeholder="Write your message here...">{{ old('message') }}</textarea>
 
-                            <p id="messageError" class="mt-2 hidden text-sm text-red-500">
-                                Message is required.
-                            </p>
+                            @error('message')
+                                <p class="mt-2 text-sm text-red-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
 
                         <button type="submit"
@@ -155,29 +178,29 @@
                 </div>
 
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-    <h3 class="mb-5 text-lg font-bold text-gray-900">
-        Business Hours
-    </h3>
+                    <h3 class="mb-5 text-lg font-bold text-gray-900">
+                        Business Hours
+                    </h3>
 
-    <div class="space-y-3 text-sm text-gray-600">
+                    <div class="space-y-3 text-sm text-gray-600">
 
-        <div class="flex justify-between gap-4">
-            <span>Monday - Friday</span>
-            <span class="text-right">9:00 AM - 6:00 PM</span>
-        </div>
+                        <div class="flex justify-between gap-4">
+                            <span>Monday - Friday</span>
+                            <span class="text-right">9:00 AM - 6:00 PM</span>
+                        </div>
 
-        <div class="flex justify-between gap-4">
-            <span>Saturday</span>
-            <span class="text-red-500">Closed</span>
-        </div>
+                        <div class="flex justify-between gap-4">
+                            <span>Saturday</span>
+                            <span class="text-red-500">Closed</span>
+                        </div>
 
-        <div class="flex justify-between gap-4">
-            <span>Sunday</span>
-            <span class="text-right">10:00 AM - 4:00 PM</span>
-        </div>
+                        <div class="flex justify-between gap-4">
+                            <span>Sunday</span>
+                            <span class="text-right">10:00 AM - 4:00 PM</span>
+                        </div>
 
-    </div>
-</div>
+                    </div>
+                </div>
 
                 <div class="rounded-2xl bg-blue-600 p-5 text-white shadow-sm min-h-[220px]">
                     <h3 class="text-lg font-bold">
@@ -193,86 +216,5 @@
         </div>
     </div>
 </div>
-
-<script>
-    const form = document.getElementById('contactForm');
-    const successMessage = document.getElementById('successMessage');
-
-    const fields = {
-        name: document.getElementById('name'),
-        email: document.getElementById('email'),
-        subject: document.getElementById('subject'),
-        message: document.getElementById('message'),
-    };
-
-    const errors = {
-        name: document.getElementById('nameError'),
-        email: document.getElementById('emailError'),
-        subject: document.getElementById('subjectError'),
-        message: document.getElementById('messageError'),
-    };
-
-    function showError(fieldName) {
-        errors[fieldName].classList.remove('hidden');
-        fields[fieldName].classList.add('border-red-400', 'focus:border-red-500', 'focus:ring-red-100');
-    }
-
-    function clearError(fieldName) {
-        errors[fieldName].classList.add('hidden');
-        fields[fieldName].classList.remove('border-red-400', 'focus:border-red-500', 'focus:ring-red-100');
-    }
-
-    function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        let isValid = true;
-        successMessage.classList.add('hidden');
-
-        Object.keys(fields).forEach(clearError);
-
-        if (fields.name.value.trim() === '') {
-            showError('name');
-            isValid = false;
-        }
-
-        if (!isValidEmail(fields.email.value.trim())) {
-            showError('email');
-            isValid = false;
-        }
-
-        if (fields.subject.value.trim() === '') {
-            showError('subject');
-            isValid = false;
-        }
-
-        if (fields.message.value.trim() === '') {
-            showError('message');
-            isValid = false;
-        }
-
-        if (!isValid) {
-            return;
-        }
-
-        successMessage.classList.remove('hidden');
-        form.reset();
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-
-    Object.keys(fields).forEach(function (fieldName) {
-        fields[fieldName].addEventListener('input', function () {
-            clearError(fieldName);
-            successMessage.classList.add('hidden');
-        });
-    });
-</script>
 
 @endsection
