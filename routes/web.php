@@ -28,23 +28,45 @@ Route::middleware('auth')->group(function () {
     Route::get('/vehicles/{vehicle}', [VehiclePageController::class, 'show'])
         ->name('vehicles.show');
 
-    Route::get('/my-bookings', [BookingPageController::class, 'index'])
-        ->name('user.bookings');
+    Route::get('/my-bookings', function (Request $request) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
-    Route::get('/bookings/create/{vehicle}', [BookingPageController::class, 'create'])
-        ->name('bookings.create');
+        return app(BookingPageController::class)->index();
+    })->name('user.bookings');
 
-    Route::get('/bookings/{booking}/edit', [BookingPageController::class, 'edit'])
-        ->name('bookings.edit');
+    Route::get('/bookings/create/{vehicle}', function (Request $request, $vehicle) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
-    Route::post('/bookings', [BookingPageController::class, 'store'])
-        ->name('bookings.page.store');
+        return app(BookingPageController::class)
+            ->create($request, \App\Models\Vehicles::findOrFail($vehicle));
+    })->name('bookings.create');
 
-    Route::patch('/bookings/{booking}', [BookingPageController::class, 'update'])
-        ->name('bookings.page.update');
+    Route::get('/bookings/{booking}/edit', function (Request $request, $booking) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
-    Route::patch('/bookings/{booking}/cancel', [BookingPageController::class, 'cancel'])
-        ->name('bookings.page.cancel');
+        return app(BookingPageController::class)
+            ->edit($request, \App\Models\Bookings::findOrFail($booking));
+    })->name('bookings.edit');
+
+    Route::post('/bookings', function (Request $request) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
+
+        return app(BookingPageController::class)->store($request);
+    })->name('bookings.page.store');
+
+    Route::patch('/bookings/{booking}', function (Request $request, $booking) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
+
+        return app(BookingPageController::class)
+            ->update($request, \App\Models\Bookings::findOrFail($booking));
+    })->name('bookings.page.update');
+
+    Route::patch('/bookings/{booking}/cancel', function (Request $request, $booking) {
+        abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
+
+        return app(BookingPageController::class)
+            ->cancel($request, \App\Models\Bookings::findOrFail($booking));
+    })->name('bookings.page.cancel');
 });
 
 // ===================== Authenticated Routes =====================
@@ -156,6 +178,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->reject(\App\Models\Bookings::findOrFail($booking));
 
         })->name('bookings.reject');
+
+        Route::get('/contact', function (Request $request) {
+
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return view('vendor.contact');
+
+        })->name('contact');
     });
 
     // ===================== Admin Routes =====================

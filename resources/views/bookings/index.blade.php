@@ -13,51 +13,13 @@
 
 @include('partials.navbar')
 
-<script>
-async function cancelBooking(event, bookingId) {
-    event.preventDefault();
-    
-    if (!confirm('Are you sure you want to cancel this booking?')) {
-        return;
-    }
-    
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        
-        const response = await fetch(`/bookings/${bookingId}/cancel`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken || '',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin',
-        });
-        
-        const text = await response.text();
-        
-        if (!response.ok) {
-            throw new Error(`Failed to cancel booking (Status: ${response.status})`);
-        }
-        
-        const data = JSON.parse(text);
-        
-        if (data.success) {
-            alert('Booking cancelled successfully');
-            location.reload();
-        }
-    } catch (error) {
-        alert('Failed to cancel booking: ' + error.message);
-    }
-}
-</script>
-
 <main class="bookings-page-wrapper">
     <section class="bookings-page-header">
         <h1>My Bookings</h1>
         <p>View and manage your vehicle bookings</p>
     </section>
+
+    <div id="bookingMessage" class="mx-auto mb-4 hidden max-w-[1500px] rounded-xl px-5 py-3 text-sm font-semibold"></div>
 
     <section class="bookings-list">
         @if ($isLoading)
@@ -87,7 +49,7 @@ async function cancelBooking(event, bookingId) {
                     $statusClass = $statusClasses[$statusLabel] ?? 'bg-gray-100 text-gray-600';
                 @endphp
 
-                <div class="booking-card">
+                <div class="booking-card" id="booking-card-{{ $booking->id }}">
                     <div class="booking-image">
                         <img src="{{ asset($booking->vehicle?->image) }}" alt="{{ $booking->vehicle?->name }}">
                     </div>
@@ -137,7 +99,7 @@ async function cancelBooking(event, bookingId) {
                                 <button
                                     type="button"
                                     class="booking-btn booking-btn-light"
-                                    onclick="alert('Vendor contact feature will be available in the next update.')"
+                                    onclick="showBookingMessage('Vendor contact feature will be available in the next update.', 'info')"
                                 >
                                     Contact Vendor
                                 </button>
@@ -150,7 +112,7 @@ async function cancelBooking(event, bookingId) {
                                 <button
                                     type="button"
                                     class="booking-btn booking-btn-danger"
-                                    onclick="cancelBooking(event, {{ $booking->id }})"
+                                    onclick="openCancelBookingModal({{ $booking->id }}, '{{ $booking->vehicle?->name }}', 'BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}')"
                                 >
                                     Cancel Booking
                                 </button>
@@ -173,6 +135,139 @@ async function cancelBooking(event, bookingId) {
         @endif
     </section>
 </main>
+
+<!-- Cancel Booking Modal -->
+<div id="cancelBookingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div class="flex items-start gap-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Cancel Booking?</h2>
+
+                <p class="mt-2 text-sm leading-6 text-gray-500">
+                    Are you sure you want to cancel
+                    <span id="cancelBookingName" class="font-semibold text-gray-900"></span>
+                    <span id="cancelBookingId" class="font-semibold text-gray-900"></span>?
+                    This will update the booking status to Cancelled.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button
+                type="button"
+                onclick="closeCancelBookingModal()"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+                Keep Booking
+            </button>
+
+            <button
+                type="button"
+                onclick="confirmCancelBooking()"
+                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            >
+                Yes, Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedBookingId = null;
+
+    function showBookingMessage(message, type = 'success') {
+        const messageBox = document.getElementById('bookingMessage');
+
+        messageBox.textContent = message;
+        messageBox.classList.remove(
+            'hidden',
+            'bg-green-50',
+            'text-green-700',
+            'border-green-200',
+            'bg-red-50',
+            'text-red-700',
+            'border-red-200',
+            'bg-blue-50',
+            'text-blue-700',
+            'border-blue-200'
+        );
+
+        messageBox.classList.add('border');
+
+        if (type === 'error') {
+            messageBox.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
+        } else if (type === 'info') {
+            messageBox.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200');
+        } else {
+            messageBox.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+        }
+
+        setTimeout(() => {
+            messageBox.classList.add('hidden');
+        }, 3500);
+    }
+
+    function openCancelBookingModal(bookingId, vehicleName, bookingCode) {
+        selectedBookingId = bookingId;
+
+        document.getElementById('cancelBookingName').textContent = vehicleName || 'this booking';
+        document.getElementById('cancelBookingId').textContent = bookingCode ? '(' + bookingCode + ')' : '';
+
+        const modal = document.getElementById('cancelBookingModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeCancelBookingModal() {
+        const modal = document.getElementById('cancelBookingModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+
+        selectedBookingId = null;
+    }
+
+    async function confirmCancelBooking() {
+        if (!selectedBookingId) {
+            return;
+        }
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            const response = await fetch(`/bookings/${selectedBookingId}/cancel`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to cancel booking. Status: ${response.status}`);
+            }
+
+            closeCancelBookingModal();
+            showBookingMessage('Booking cancelled successfully.', 'success');
+
+            setTimeout(() => {
+                location.reload();
+            }, 700);
+
+        } catch (error) {
+            closeCancelBookingModal();
+            showBookingMessage(error.message || 'Failed to cancel booking.', 'error');
+        }
+    }
+</script>
 
 </body>
 </html>
