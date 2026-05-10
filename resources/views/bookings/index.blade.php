@@ -47,6 +47,19 @@
                     ];
 
                     $statusClass = $statusClasses[$statusLabel] ?? 'bg-gray-100 text-gray-600';
+
+                    $vendorEmail = $booking->vehicle?->vendor?->email ?? '';
+                    $vehicleName = $booking->vehicle?->name ?? 'Vehicle';
+                    $bookingCode = 'BK-' . str_pad($booking->id, 4, '0', STR_PAD_LEFT);
+                    $mailSubject = rawurlencode('Question about booking ' . $bookingCode);
+                    $mailBody = rawurlencode(
+                        "Hello,\n\nI would like to ask about my booking.\n\n" .
+                        "Booking ID: {$bookingCode}\n" .
+                        "Vehicle: {$vehicleName}\n" .
+                        "Pick-up: " . optional($booking->start_date)->format('n/j/Y') . "\n" .
+                        "Drop-off: " . optional($booking->end_date)->format('n/j/Y') . "\n\n" .
+                        "Thank you."
+                    );
                 @endphp
 
                 <div class="booking-card" id="booking-card-{{ $booking->id }}">
@@ -59,7 +72,7 @@
                             <div>
                                 <h3>{{ $booking->vehicle?->name }}</h3>
                                 <p class="booking-id">
-                                    Booking ID: BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}
+                                    Booking ID: {{ $bookingCode }}
                                 </p>
                             </div>
 
@@ -96,13 +109,20 @@
                                     View Details
                                 </a>
 
-                                <button
-                                    type="button"
-                                    class="booking-btn booking-btn-light"
-                                    onclick="showBookingMessage('Vendor contact feature will be available in the next update.', 'info')"
-                                >
-                                    Contact Vendor
-                                </button>
+                                @if ($vendorEmail)
+                                    <a href="mailto:{{ $vendorEmail }}?subject={{ $mailSubject }}&body={{ $mailBody }}"
+                                       class="booking-btn booking-btn-light">
+                                        Contact Vendor
+                                    </a>
+                                @else
+                                    <button
+                                        type="button"
+                                        class="booking-btn booking-btn-light"
+                                        onclick="showBookingMessage('Vendor email is not available for this booking.', 'error')"
+                                    >
+                                        Contact Vendor
+                                    </button>
+                                @endif
 
                             @elseif ($statusLabel === 'Pending')
                                 <a href="{{ route('bookings.edit', $booking) }}" class="booking-btn booking-btn-light">
@@ -112,7 +132,7 @@
                                 <button
                                     type="button"
                                     class="booking-btn booking-btn-danger"
-                                    onclick="openCancelBookingModal({{ $booking->id }}, '{{ $booking->vehicle?->name }}', 'BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}')"
+                                    onclick="openCancelBookingModal({{ $booking->id }}, '{{ $booking->vehicle?->name }}', '{{ $bookingCode }}')"
                                 >
                                     Cancel Booking
                                 </button>

@@ -33,68 +33,72 @@
                 $vehicleImage = $booking->vehicle->image ?? 'images/vehicles/car1.jpg';
             @endphp
 
-            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
-                <div class="flex gap-4">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 sm:p-5">
+                <div class="flex flex-col sm:flex-row gap-4">
 
                     <img src="{{ asset($vehicleImage) }}"
                          alt="{{ $vehicleName }}"
-                         class="w-28 h-24 rounded-xl object-cover bg-gray-100">
+                         class="w-full sm:w-28 h-36 sm:h-24 rounded-xl object-cover bg-gray-100">
 
-                    <div class="flex-1">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <h2 class="text-lg font-bold text-gray-900">{{ $vehicleName }}</h2>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h2 class="text-lg font-bold text-gray-900 break-words">{{ $vehicleName }}</h2>
                                 <p class="text-xs text-gray-500 mt-1">
                                     Booking ID: BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}
                                 </p>
                             </div>
 
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-700' }}">
+                            <span class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-700' }}">
                                 {{ $status }}
                             </span>
                         </div>
 
-                        <div class="grid grid-cols-4 gap-4 mt-5">
-                            <div class="flex items-start gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+                            <div class="flex items-start gap-2 min-w-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="hidden sm:block w-4 h-4 text-gray-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25a8.25 8.25 0 0115 0" />
                                 </svg>
-                                <div>
+                                <div class="min-w-0">
                                     <p class="text-[11px] text-gray-400">Customer</p>
-                                    <p class="text-xs font-medium text-gray-700">{{ $customerName }}</p>
+                                    <p class="text-xs font-medium text-gray-700 break-words">{{ $customerName }}</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <div class="flex items-start gap-2 min-w-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="hidden sm:block w-4 h-4 text-gray-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4.5 11h15M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
                                 </svg>
-                                <div>
+                                <div class="min-w-0">
                                     <p class="text-[11px] text-gray-400">Pick-up</p>
-                                    <p class="text-xs font-medium text-gray-700">{{ $booking->start_date?->format('d/m/Y') }}</p>
+                                    <p class="text-xs font-medium text-gray-700 whitespace-nowrap">
+                                        {{ $booking->start_date?->format('d/m/Y') }}
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <div class="flex items-start gap-2 min-w-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="hidden sm:block w-4 h-4 text-gray-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4.5 11h15M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
                                 </svg>
-                                <div>
+                                <div class="min-w-0">
                                     <p class="text-[11px] text-gray-400">Drop-off</p>
-                                    <p class="text-xs font-medium text-gray-700">{{ $booking->end_date?->format('d/m/Y') }}</p>
+                                    <p class="text-xs font-medium text-gray-700 whitespace-nowrap">
+                                        {{ $booking->end_date?->format('d/m/Y') }}
+                                    </p>
                                 </div>
                             </div>
 
-                            <div>
+                            <div class="min-w-0">
                                 <p class="text-[11px] text-gray-400">Total</p>
-                                <p class="text-sm font-semibold text-blue-600">
+                                <p class="text-sm font-semibold text-blue-600 whitespace-nowrap">
                                     Rs. {{ number_format($booking->total_price, 0) }}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 mt-5">
+                        <div class="flex flex-wrap items-center gap-2 mt-5">
                             <button type="button"
                                 data-id="BK-{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}"
                                 data-vehicle="{{ $vehicleName }}"
@@ -175,7 +179,7 @@
             </button>
         </div>
 
-        <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
+        <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
                 <p class="text-xs text-gray-400">Vehicle</p>
                 <p id="modalVehicle" class="font-semibold text-gray-900"></p>
@@ -216,12 +220,12 @@
                 <p id="modalDropoff" class="font-semibold text-gray-900"></p>
             </div>
 
-            <div class="col-span-2">
+            <div class="sm:col-span-2">
                 <p class="text-xs text-gray-400">Total Price</p>
                 <p id="modalPrice" class="font-bold text-blue-600"></p>
             </div>
 
-            <div class="col-span-2">
+            <div class="sm:col-span-2">
                 <p class="text-xs text-gray-400">Special Request</p>
                 <p id="modalRequest" class="font-medium text-gray-700"></p>
             </div>
