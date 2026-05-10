@@ -79,6 +79,18 @@
                     Bookings
                 </a>
 
+                <!-- Reviews -->
+                <a href="{{ route('vendor.reviews.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                   {{ request()->routeIs('vendor.reviews.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.956a1 1 0 00.95.69h4.159c.969 0 1.371 1.24.588 1.81l-3.365 2.445a1 1 0 00-.364 1.118l1.286 3.956c.3.921-.755 1.688-1.539 1.118l-3.365-2.445a1 1 0 00-1.176 0L8.046 18.02c-.784.57-1.838-.197-1.539-1.118l1.286-3.956a1 1 0 00-.364-1.118L4.064 9.383c-.783-.57-.38-1.81.588-1.81h4.159a1 1 0 00.95-.69l1.288-3.956z" />
+                    </svg>
+
+                    Reviews
+                </a>
+
                 <!-- Contact -->
                 <a href="{{ route('vendor.contact') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
@@ -95,7 +107,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-6">
             @yield('content')
         </main>
 

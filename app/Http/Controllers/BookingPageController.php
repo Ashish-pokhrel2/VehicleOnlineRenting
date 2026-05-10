@@ -24,18 +24,15 @@ class BookingPageController extends Controller
         $bookings = collect();
         $errorMessage = null;
 
-        // Show message if the user is not logged in
         if (! auth()->check()) {
             $errorMessage = 'Sign in to view your bookings.';
         } else {
-            // Fetch bookings with related vehicle and vendor information
             $bookings = Bookings::with(['vehicle', 'vendor:id,name'])
                 ->where('customer_id', auth()->id())
                 ->latest()
                 ->get();
         }
 
-        // Define CSS classes for different booking statuses
         $statusClasses = [
             'Confirmed' => 'status-confirmed',
             'Pending' => 'status-pending',
@@ -43,7 +40,6 @@ class BookingPageController extends Controller
             'Cancelled' => 'status-cancelled',
         ];
 
-        // Return booking history data to the view
         return view('bookings.index', [
             'bookings' => $bookings,
             'statusClasses' => $statusClasses,
@@ -56,6 +52,12 @@ class BookingPageController extends Controller
     public function create(Request $request, Vehicles $vehicle): View
     {
         $this->ensureCustomer();
+
+        abort_unless(
+            $vehicle->available,
+            Response::HTTP_FORBIDDEN,
+            'This vehicle is currently unavailable for booking.'
+        );
 
         return $this->renderBookingForm($request, $vehicle);
     }
@@ -80,14 +82,25 @@ class BookingPageController extends Controller
     {
         $this->ensureCustomer();
 
-        // Validate required booking form inputs
         $validated = $this->validateBookingInput($request);
 
-        // Find the selected vehicle from the database
         $vehicle = Vehicles::findOrFail($validated['vehicle_id']);
-        $pricing = $this->calculateBookingPricing($validated['start_date'], $validated['end_date'], $vehicle->price_per_day);
 
-        // Create a new booking record
+        if (! $vehicle->available) {
+            return redirect()
+                ->route('vehicles.show', $vehicle)
+                ->withErrors([
+                    'vehicle' => 'This vehicle is currently unavailable for booking.',
+                ])
+                ->withInput();
+        }
+
+        $pricing = $this->calculateBookingPricing(
+            $validated['start_date'],
+            $validated['end_date'],
+            $vehicle->price_per_day
+        );
+
         Bookings::create([
             'vehicle_id' => $vehicle->id,
             'customer_id' => auth()->id(),
@@ -104,7 +117,6 @@ class BookingPageController extends Controller
             'status' => BookingStatus::PENDING,
         ]);
 
-        // Redirect user to booking history with success message
         return redirect()
             ->route('user.bookings')
             ->with('success', 'Booking confirmed successfully.');
@@ -121,6 +133,7 @@ class BookingPageController extends Controller
         );
 
         $validated = $this->validateBookingInput($request);
+
         $pricing = $this->calculateBookingPricing(
             $validated['start_date'],
             $validated['end_date'],
@@ -164,23 +177,18 @@ class BookingPageController extends Controller
 
     private function renderBookingForm(Request $request, Vehicles $vehicle, ?Bookings $booking = null): View
     {
-        // Load vendor information for the selected vehicle
         $vehicle->load('vendor:id,name');
 
-        // Fetch booking settings and pickup time slot options
         $settings = BookingSetting::query()->latest()->first();
         $pickupTimeSlots = PickupTimeSlot::orderedWithDefaults();
 
-        // Calculate estimated booking values
         $estimatedDays = $this->resolveEstimatedDays($request, $settings?->default_estimated_days ?? 1, $booking);
         $serviceFee = $settings?->service_fee ?? 0;
         $subtotal = $vehicle->price_per_day * $estimatedDays;
         $total = $subtotal + $serviceFee;
 
-        // Set vehicle availability label for display
         $availabilityLabel = $vehicle->available ? 'Available Now' : 'Currently Unavailable';
 
-        // Return booking page data to the view
         return view('bookings.create', [
             'vehicle' => $vehicle,
             'editingBooking' => $booking,

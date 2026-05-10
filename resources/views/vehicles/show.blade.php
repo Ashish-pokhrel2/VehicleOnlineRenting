@@ -161,21 +161,29 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 space-y-3">
-                        <a href="{{ route('bookings.create', $vehicle) }}"
-                           class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition">
-                            Book Now
-                        </a>
+<div class="mt-6 space-y-3">
+    @if($vehicle->available)
+        <a href="{{ route('bookings.create', $vehicle) }}"
+           class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition">
+            Book Now
+        </a>
+    @else
+        <button type="button"
+                disabled
+                class="block w-full cursor-not-allowed text-center bg-gray-300 text-gray-500 py-4 rounded-xl font-semibold">
+            Currently Unavailable
+        </button>
+    @endif
 
-                        <a href="{{ route('vehicles.index') }}"
-                           class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition">
-                            Back to Listing
-                        </a>
-                    </div>
+    <a href="{{ route('vehicles.index') }}"
+       class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition">
+        Back to Listing
+    </a>
+</div>
 
-                    <p class="text-xs text-gray-400 mt-5 leading-6">
-                        Final booking validation and confirmation will be handled by backend integration.
-                    </p>
+<p class="text-xs text-gray-400 mt-5 leading-6">
+    Final booking validation and confirmation will be handled by backend integration.
+</p>
                 </div>
             </div>
 

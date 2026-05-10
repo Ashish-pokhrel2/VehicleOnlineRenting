@@ -9,6 +9,7 @@ use App\Http\Controllers\VendorBookingController;
 use App\Http\Controllers\VendorContactController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\VendorVehicleController;
+use App\Http\Controllers\Vendor\VendorReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -159,6 +160,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return app(VendorBookingController::class)
                 ->reject(\App\Models\Bookings::findOrFail($booking));
         })->name('bookings.reject');
+
+        Route::get('/reviews', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorReviewController::class)->index($request);
+        })->name('reviews.index');
+
+        Route::post('/reviews/{review}/reply', function (Request $request, \App\Models\Review $review) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorReviewController::class)->reply($request, $review);
+        })->name('reviews.reply');
 
         Route::get('/contact', [VendorContactController::class, 'index'])
             ->name('contact');
