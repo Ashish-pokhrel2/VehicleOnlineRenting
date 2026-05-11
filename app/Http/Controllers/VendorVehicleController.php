@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VehicleType;
 use App\Models\Vehicles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,9 @@ class VendorVehicleController extends Controller
 
     public function create()
     {
-        return view('vendor.vehicles.create');
+        $allVehicles = Vehicles::orderBy('name')->get();
+
+        return view('vendor.vehicles.create', compact('allVehicles'));
     }
 
     public function store(Request $request)
@@ -28,41 +31,45 @@ class VendorVehicleController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:Car,Bike,Scooter,Bus',
             'category' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
             'price_per_day' => 'required|numeric|min:1',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'description' => 'nullable|string',
-            'seats' => 'nullable|integer|min:1',
-            'transmission' => 'nullable|string|max:255',
-            'fuel' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'template_image' => 'nullable|string',
+            'description' => 'required|string',
+            'seats' => 'required|integer|min:1',
+            'transmission' => 'required|string|max:255',
+            'fuel' => 'required|string|max:255',
             'available' => 'nullable|boolean',
-        ], [], [
-            'name' => 'vehicle name',
-            'type' => 'vehicle type',
-            'category' => 'category',
-            'price_per_day' => 'price per day',
-            'image' => 'vehicle image',
         ]);
 
-        $imagePath = $request->file('image')->store('images/vehicles', 'public');
+        if ($request->hasFile('image')) {
+            $storedImage = $request->file('image')->store('images/vehicles', 'public');
+            $imagePath = 'storage/' . $storedImage;
+        } elseif (!empty($validated['template_image'])) {
+            $imagePath = $validated['template_image'];
+        } else {
+            return back()
+                ->withErrors(['image' => 'The vehicle image field is required.'])
+                ->withInput();
+        }
 
         Vehicles::create([
             'vendor_id' => Auth::id(),
             'name' => $validated['name'],
-            'type' => $validated['type'],
+            'type' => VehicleType::from($validated['type']),
             'category' => $validated['category'],
-            'location' => $validated['location'] ?? null,
+            'location' => $validated['location'],
             'price_per_day' => $validated['price_per_day'],
-            'image' => 'storage/' . $imagePath,
-            'description' => $validated['description'] ?? 'No description provided.',
-            'seats' => $validated['seats'] ?? 4,
-            'transmission' => $validated['transmission'] ?? 'Automatic',
-            'fuel' => $validated['fuel'] ?? 'Petrol',
+            'image' => $imagePath,
+            'images' => [$imagePath],
+            'description' => $validated['description'],
+            'seats' => $validated['seats'],
+            'transmission' => $validated['transmission'],
+            'fuel' => $validated['fuel'],
             'rating' => 0,
             'reviews' => 0,
             'available' => $request->boolean('available'),
             'features' => [],
-            'images' => [],
         ]);
 
         return redirect()
@@ -74,7 +81,9 @@ class VendorVehicleController extends Controller
     {
         abort_unless($vehicle->vendor_id === Auth::id(), 403);
 
-        return view('vendor.vehicles.edit', compact('vehicle'));
+        $allVehicles = Vehicles::orderBy('name')->get();
+
+        return view('vendor.vehicles.edit', compact('vehicle', 'allVehicles'));
     }
 
     public function update(Request $request, Vehicles $vehicle)
@@ -85,20 +94,14 @@ class VendorVehicleController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:Car,Bike,Scooter,Bus',
             'category' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
             'price_per_day' => 'required|numeric|min:1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'description' => 'nullable|string',
-            'seats' => 'nullable|integer|min:1',
-            'transmission' => 'nullable|string|max:255',
-            'fuel' => 'nullable|string|max:255',
+            'description' => 'required|string',
+            'seats' => 'required|integer|min:1',
+            'transmission' => 'required|string|max:255',
+            'fuel' => 'required|string|max:255',
             'available' => 'nullable|boolean',
-        ], [], [
-            'name' => 'vehicle name',
-            'type' => 'vehicle type',
-            'category' => 'category',
-            'price_per_day' => 'price per day',
-            'image' => 'vehicle image',
         ]);
 
         $imagePath = $vehicle->image;
@@ -110,15 +113,16 @@ class VendorVehicleController extends Controller
 
         $vehicle->update([
             'name' => $validated['name'],
-            'type' => $validated['type'],
+            'type' => VehicleType::from($validated['type']),
             'category' => $validated['category'],
-            'location' => $validated['location'] ?? null,
+            'location' => $validated['location'],
             'price_per_day' => $validated['price_per_day'],
             'image' => $imagePath,
-            'description' => $validated['description'] ?? $vehicle->description,
-            'seats' => $validated['seats'] ?? $vehicle->seats,
-            'transmission' => $validated['transmission'] ?? $vehicle->transmission,
-            'fuel' => $validated['fuel'] ?? $vehicle->fuel,
+            'images' => [$imagePath],
+            'description' => $validated['description'],
+            'seats' => $validated['seats'],
+            'transmission' => $validated['transmission'],
+            'fuel' => $validated['fuel'],
             'available' => $request->boolean('available'),
         ]);
 

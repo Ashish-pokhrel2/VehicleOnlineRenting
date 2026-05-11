@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PickupTimeSlotsSeeder::class,
             BookingSettingsSeeder::class,
             BookingsSeeder::class,
+            ReviewsSeeder::class,
         ]);
     }
 }

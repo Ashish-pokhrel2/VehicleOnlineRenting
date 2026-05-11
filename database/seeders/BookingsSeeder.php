@@ -11,42 +11,59 @@ use Illuminate\Support\Carbon;
 
 class BookingsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $customer = User::where('email', 'customer@example.com')->firstOrFail();
 
         $bookings = [
             [
-                'vehicle' => 'Mercedes S-Class',
+                'vehicle' => 'Eicher Skyline',
                 'status' => BookingStatus::CONFIRMED,
-                'start_date' => '2026-03-25',
-                'end_date' => '2026-03-28',
-                'total_price' => 450,
-                'booked_date' => '2026-03-20',
+                'start_date' => '2026-05-12',
+                'end_date' => '2026-05-13',
+                'pickup_time' => '9:00 AM',
+                'total_price' => 15000,
+                'booked_date' => '2026-05-10',
+                'special_request' => 'Need early pickup confirmation',
             ],
             [
-                'vehicle' => 'Harley Davidson',
+                'vehicle' => 'Suzuki Avenis 125',
+                'status' => BookingStatus::CONFIRMED,
+                'start_date' => '2026-05-05',
+                'end_date' => '2026-05-06',
+                'pickup_time' => '11:00 AM',
+                'total_price' => 600,
+                'booked_date' => '2026-05-05',
+                'special_request' => 'Customer requested pickup confirmation',
+            ],
+            [
+                'vehicle' => 'Honda CRF300L',
                 'status' => BookingStatus::PENDING,
-                'start_date' => '2026-04-01',
-                'end_date' => '2026-04-03',
-                'total_price' => 160,
-                'booked_date' => '2026-03-22',
+                'start_date' => '2026-05-01',
+                'end_date' => '2026-05-02',
+                'pickup_time' => '9:00 AM',
+                'total_price' => 1500,
+                'booked_date' => '2026-05-01',
+                'special_request' => 'Customer requested helmet and early pickup',
             ],
             [
-                'vehicle' => 'Range Rover Sport',
-                'status' => BookingStatus::COMPLETED,
-                'start_date' => '2026-03-15',
-                'end_date' => '2026-03-18',
-                'total_price' => 540,
-                'booked_date' => '2026-03-10',
+                'vehicle' => 'Yamaha RayZR 125 Fi Hybrid',
+                'status' => BookingStatus::CONFIRMED,
+                'start_date' => '2026-05-02',
+                'end_date' => '2026-05-04',
+                'pickup_time' => '10:00 AM',
+                'total_price' => 1100,
+                'booked_date' => '2026-05-02',
+                'special_request' => 'Customer requested fuel-efficient scooter for city travel',
             ],
         ];
 
         foreach ($bookings as $data) {
-            $vehicle = Vehicles::where('name', $data['vehicle'])->firstOrFail();
+            $vehicle = Vehicles::where('name', $data['vehicle'])->first();
+
+            if (! $vehicle) {
+                continue;
+            }
 
             $booking = Bookings::updateOrCreate(
                 [
@@ -57,12 +74,19 @@ class BookingsSeeder extends Seeder
                 ],
                 [
                     'vendor_id' => $vehicle->vendor_id,
+                    'pickup_time' => $data['pickup_time'],
+                    'full_name' => $customer->name,
+                    'phone' => '9800000010',
+                    'email' => $customer->email,
+                    'citizenship_id' => '1234567890',
                     'total_price' => $data['total_price'],
                     'status' => $data['status'],
+                    'special_request' => $data['special_request'],
                 ]
             );
 
             $bookedAt = Carbon::parse($data['booked_date']);
+
             $booking->forceFill([
                 'created_at' => $bookedAt,
                 'updated_at' => $bookedAt,
