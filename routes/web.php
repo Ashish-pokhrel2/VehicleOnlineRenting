@@ -10,6 +10,7 @@ use App\Http\Controllers\Vendor\VendorReviewController;
 use App\Http\Controllers\VendorBookingController;
 use App\Http\Controllers\VendorContactController;
 use App\Http\Controllers\VendorDashboardController;
+use App\Http\Controllers\VendorNotificationController;
 use App\Http\Controllers\VendorVehicleController;
 use App\Models\Bookings;
 use App\Models\Review;
@@ -170,6 +171,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return app(VendorBookingController::class)
                 ->reject(Bookings::findOrFail($booking));
         })->name('bookings.reject');
+
+        Route::get('/notifications/{notification}/read', [VendorNotificationController::class, 'read'])
+            ->name('notifications.read');
+
+        Route::post('/notifications/read-all', [VendorNotificationController::class, 'readAll'])
+            ->name('notifications.readAll');
 
         Route::get('/reviews', function (Request $request) {
             abort_unless($request->user()?->isVendor(), 403);

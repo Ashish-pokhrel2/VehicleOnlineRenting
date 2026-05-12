@@ -7,6 +7,9 @@ use App\Models\Bookings;
 use App\Models\BookingSetting;
 use App\Models\PickupTimeSlot;
 use App\Models\Vehicles;
+use App\Notifications\BookingCancelledNotification;
+use App\Notifications\BookingCreatedNotification;
+use App\Notifications\BookingUpdatedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +19,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class BookingPageController extends Controller
 {
-    // Display all bookings for the authenticated user
     public function index(): View
     {
         $this->ensureCustomer();
@@ -48,7 +50,6 @@ class BookingPageController extends Controller
         ]);
     }
 
-    // Display the booking creation page for a selected vehicle
     public function create(Request $request, Vehicles $vehicle): View
     {
         $this->ensureCustomer();
@@ -62,7 +63,6 @@ class BookingPageController extends Controller
         return $this->renderBookingForm($request, $vehicle);
     }
 
-    // Display the booking modification page for an existing booking
     public function edit(Request $request, Bookings $booking): View
     {
         $this->ensureCustomer();
@@ -77,7 +77,6 @@ class BookingPageController extends Controller
         return $this->renderBookingForm($request, $booking->vehicle, $booking);
     }
 
-    // Handle booking form submission and save booking data
     public function store(Request $request): RedirectResponse
     {
         $this->ensureCustomer();
@@ -101,7 +100,7 @@ class BookingPageController extends Controller
             $vehicle->price_per_day
         );
 
-        Bookings::create([
+        $booking = Bookings::create([
             'vehicle_id' => $vehicle->id,
             'customer_id' => auth()->id(),
             'vendor_id' => $vehicle->vendor_id,
@@ -117,12 +116,17 @@ class BookingPageController extends Controller
             'status' => BookingStatus::PENDING,
         ]);
 
+        $booking->loadMissing(['vehicle', 'customer', 'vendor']);
+
+        if ($booking->vendor) {
+            $booking->vendor->notify(new BookingCreatedNotification($booking));
+        }
+
         return redirect()
             ->route('user.bookings')
             ->with('success', 'Booking confirmed successfully.');
     }
 
-    // Handle pending booking modification and save updated booking data
     public function update(Request $request, Bookings $booking): RedirectResponse
     {
         $this->ensureCustomer();
@@ -152,12 +156,17 @@ class BookingPageController extends Controller
             'total_price' => $pricing['total_price'],
         ]);
 
+        $booking->loadMissing(['vehicle', 'customer', 'vendor']);
+
+        if ($booking->vendor) {
+            $booking->vendor->notify(new BookingUpdatedNotification($booking));
+        }
+
         return redirect()
             ->route('user.bookings')
             ->with('success', 'Booking updated successfully.');
     }
 
-    // Handle cancellation of a pending booking via AJAX
     public function cancel(Request $request, Bookings $booking): JsonResponse
     {
         $this->ensureCustomer();
@@ -168,6 +177,12 @@ class BookingPageController extends Controller
         );
 
         $booking->update(['status' => BookingStatus::CANCELLED]);
+
+        $booking->loadMissing(['vehicle', 'customer', 'vendor']);
+
+        if ($booking->vendor) {
+            $booking->vendor->notify(new BookingCancelledNotification($booking));
+        }
 
         return response()->json([
             'success' => true,
@@ -213,9 +228,6 @@ class BookingPageController extends Controller
         ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function validateBookingInput(Request $request): array
     {
         return $request->validate([
@@ -231,9 +243,6 @@ class BookingPageController extends Controller
         ]);
     }
 
-    /**
-     * @return array{days:int,total_price:float}
-     */
     private function calculateBookingPricing(string $startDate, string $endDate, float $pricePerDay): array
     {
         $days = max(1, Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)));

@@ -10,6 +10,12 @@
 
 <body class="bg-gray-100 text-gray-900">
 
+@php
+    $vendorUser = auth()->user();
+    $unreadNotificationCount = $vendorUser?->unreadNotifications()->count() ?? 0;
+    $latestNotifications = $vendorUser?->notifications()->latest()->take(5)->get() ?? collect();
+@endphp
+
 <div class="min-h-screen">
 
     <!-- Top Navbar -->
@@ -19,6 +25,140 @@
         </div>
 
         <div class="flex items-center gap-4">
+
+            <!-- Notification Bell -->
+            <div class="relative">
+                <button type="button" id="notificationButton"
+                        class="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="w-6 h-6"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0m6 0H9" />
+                    </svg>
+
+                    @if($unreadNotificationCount > 0)
+                        <span class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full bg-red-600 text-white text-xs font-bold">
+                            {{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown"
+     class="hidden absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900">Notifications</h3>
+                            <p class="text-xs text-gray-500">
+                                {{ $unreadNotificationCount }} unread notification{{ $unreadNotificationCount === 1 ? '' : 's' }}
+                            </p>
+                        </div>
+
+                        @if($unreadNotificationCount > 0)
+                            <form method="POST" action="{{ route('vendor.notifications.readAll') }}">
+                                @csrf
+                                <button type="submit" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                                    Mark all read
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    <div class="max-h-96 overflow-y-auto">
+                        @forelse($latestNotifications as $notification)
+                            @php
+                                $data = $notification->data ?? [];
+                                $type = $data['type'] ?? 'notification';
+                                $message = $data['message'] ?? 'New notification received.';
+                                $vehicleName = $data['vehicle_name'] ?? 'Vehicle';
+                                $customerName = $data['customer_name'] ?? 'Customer';
+
+                                $badgeClass = match ($type) {
+                                    'booking_created' => 'bg-green-100 text-green-700',
+                                    'booking_cancelled' => 'bg-red-100 text-red-700',
+                                    'booking_updated' => 'bg-yellow-100 text-yellow-700',
+                                    default => 'bg-blue-100 text-blue-700',
+                                };
+
+                                $badgeText = match ($type) {
+                                    'booking_created' => 'New Booking',
+                                    'booking_cancelled' => 'Cancelled',
+                                    'booking_updated' => 'Modified',
+                                    default => 'Update',
+                                };
+                            @endphp
+
+                            <a href="{{ route('vendor.notifications.read', $notification->id) }}"
+                               class="block px-5 py-4 border-b border-gray-100 hover:bg-gray-50 transition
+                               {{ is_null($notification->read_at) ? 'bg-blue-50/60' : 'bg-white' }}">
+
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $badgeClass }}">
+                                                {{ $badgeText }}
+                                            </span>
+
+                                            @if(is_null($notification->read_at))
+                                                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                                            @endif
+                                        </div>
+
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {{ $message }}
+                                        </p>
+
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            Vehicle: <span class="font-medium">{{ $vehicleName }}</span>
+                                        </p>
+
+                                        <p class="text-xs text-gray-600">
+                                            Customer: <span class="font-medium">{{ $customerName }}</span>
+                                        </p>
+                                    </div>
+
+                                    <span class="text-[11px] text-gray-400 whitespace-nowrap">
+                                        {{ $notification->created_at?->diffForHumans() }}
+                                    </span>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="px-5 py-8 text-center">
+                                <div class="mx-auto mb-3 flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="w-6 h-6"
+                                         fill="none"
+                                         viewBox="0 0 24 24"
+                                         stroke="currentColor">
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0m6 0H9" />
+                                    </svg>
+                                </div>
+
+                                <p class="text-sm font-semibold text-gray-700">No notifications yet</p>
+                                <p class="text-xs text-gray-500 mt-1">New bookings and cancellations will appear here.</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <div class="px-5 py-3 bg-gray-50 text-center">
+                        <a href="{{ route('vendor.bookings.index') }}"
+                           class="text-sm font-semibold text-blue-600 hover:text-blue-800">
+                            View all bookings
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <span class="px-4 py-2 rounded-full bg-gray-100 text-sm font-medium">
                 Vendor
             </span>
@@ -113,6 +253,31 @@
 
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
 
+        const button = document.getElementById('notificationButton');
+        const dropdown = document.getElementById('notificationDropdown');
+
+        if (button && dropdown) {
+
+            button.addEventListener('click', function (event) {
+                event.stopPropagation();
+
+                dropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function (event) {
+
+                if (
+                    !dropdown.contains(event.target) &&
+                    !button.contains(event.target)
+                ) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
