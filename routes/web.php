@@ -5,11 +5,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePageController;
+use App\Http\Controllers\Vendor\VendorReviewController;
 use App\Http\Controllers\VendorBookingController;
 use App\Http\Controllers\VendorContactController;
 use App\Http\Controllers\VendorDashboardController;
 use App\Http\Controllers\VendorVehicleController;
-use App\Http\Controllers\Vendor\VendorReviewController;
+use App\Models\Bookings;
+use App\Models\Review;
+use App\Models\Vehicles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,14 +43,14 @@ Route::middleware('auth')->group(function () {
         abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
         return app(BookingPageController::class)
-            ->create($request, \App\Models\Vehicles::findOrFail($vehicle));
+            ->create($request, Vehicles::findOrFail($vehicle));
     })->name('bookings.create');
 
     Route::get('/bookings/{booking}/edit', function (Request $request, $booking) {
         abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
         return app(BookingPageController::class)
-            ->edit($request, \App\Models\Bookings::findOrFail($booking));
+            ->edit($request, Bookings::findOrFail($booking));
     })->name('bookings.edit');
 
     Route::post('/bookings', function (Request $request) {
@@ -60,14 +63,14 @@ Route::middleware('auth')->group(function () {
         abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
         return app(BookingPageController::class)
-            ->update($request, \App\Models\Bookings::findOrFail($booking));
+            ->update($request, Bookings::findOrFail($booking));
     })->name('bookings.page.update');
 
     Route::patch('/bookings/{booking}/cancel', function (Request $request, $booking) {
         abort_if($request->user()?->isVendor() || $request->user()?->isAdmin(), 403);
 
         return app(BookingPageController::class)
-            ->cancel($request, \App\Models\Bookings::findOrFail($booking));
+            ->cancel($request, Bookings::findOrFail($booking));
     })->name('bookings.page.cancel');
 });
 
@@ -121,7 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)
-                ->edit(\App\Models\Vehicles::findOrFail($vehicle));
+                ->edit(Vehicles::findOrFail($vehicle));
         })->name('vehicles.edit');
 
         Route::patch('/vehicles/{vehicle}', function (Request $request, $vehicle) {
@@ -130,7 +133,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return app(VendorVehicleController::class)
                 ->update(
                     $request,
-                    \App\Models\Vehicles::findOrFail($vehicle)
+                    Vehicles::findOrFail($vehicle)
                 );
         })->name('vehicles.update');
 
@@ -138,7 +141,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorVehicleController::class)
-                ->destroy(\App\Models\Vehicles::findOrFail($vehicle));
+                ->destroy(Vehicles::findOrFail($vehicle));
         })->name('vehicles.destroy');
 
         Route::get('/bookings', function (Request $request) {
@@ -151,14 +154,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorBookingController::class)
-                ->confirm(\App\Models\Bookings::findOrFail($booking));
+                ->confirm(Bookings::findOrFail($booking));
         })->name('bookings.confirm');
 
         Route::patch('/bookings/{booking}/reject', function (Request $request, $booking) {
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorBookingController::class)
-                ->reject(\App\Models\Bookings::findOrFail($booking));
+                ->reject(Bookings::findOrFail($booking));
         })->name('bookings.reject');
 
         Route::get('/reviews', function (Request $request) {
@@ -167,7 +170,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return app(VendorReviewController::class)->index($request);
         })->name('reviews.index');
 
-        Route::post('/reviews/{review}/reply', function (Request $request, \App\Models\Review $review) {
+        Route::post('/reviews/{review}/reply', function (Request $request, Review $review) {
             abort_unless($request->user()?->isVendor(), 403);
 
             return app(VendorReviewController::class)->reply($request, $review);
@@ -205,11 +208,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('admin.vehicles');
         })->name('vehicles');
 
-        Route::get('/contact', function (Request $request) {
-            abort_unless($request->user()?->isAdmin(), 403);
-
-            return view('admin.contact');
-        })->name('contact');
+        Route::get('/contact', [DashboardController::class, 'contact'])
+            ->name('contact');
 
         Route::get('/bookings', [DashboardController::class, 'bookings'])
             ->name('bookings');
