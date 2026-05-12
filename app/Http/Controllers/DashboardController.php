@@ -7,6 +7,8 @@ use App\Enums\BookingStatus;
 use App\Enums\UserRole;
 use App\Models\Bookings;
 use App\Models\BookingSettlement;
+use App\Models\Contact;
+use App\Models\ContactMessage;
 use App\Models\Reviews;
 use App\Models\User;
 use App\Models\Vehicles;
@@ -152,6 +154,58 @@ class DashboardController extends Controller
             'bookings' => $bookings,
             'search' => $search,
             'totalBookings' => Bookings::query()->count(),
+        ]);
+    }
+
+    public function contact(Request $request): View
+    {
+        $user = $request->user();
+        abort_unless($user?->isAdmin(), Response::HTTP_FORBIDDEN);
+
+        $customerMessages = Contact::query()
+            ->select(['id', 'user_id', 'subject', 'message', 'status', 'created_at'])
+            ->with('user:id,name,email')
+            ->latest('id')
+            ->get()
+            ->map(fn (Contact $contact): array => [
+                'key' => 'customer-'.$contact->id,
+                'sender_name' => $contact->user?->name ?? 'Customer',
+                'sender_email' => $contact->user?->email ?? 'N/A',
+                'subject' => $contact->subject,
+                'message' => $contact->message,
+                'status' => $contact->status?->value ?? 'Pending',
+                'source' => 'Customer',
+                'created_at' => $contact->created_at,
+            ])
+            ->toBase();
+
+        $vendorMessages = ContactMessage::query()
+            ->select(['id', 'vendor_id', 'name', 'email', 'subject', 'message', 'status', 'created_at'])
+            ->with('vendor:id,name')
+            ->latest('id')
+            ->get()
+            ->map(fn (ContactMessage $message): array => [
+                'key' => 'vendor-'.$message->id,
+                'sender_name' => $message->name,
+                'sender_email' => $message->email,
+                'subject' => $message->subject,
+                'message' => $message->message,
+                'status' => $message->status,
+                'source' => $message->vendor?->name
+                    ? 'Vendor ('.$message->vendor->name.')'
+                    : 'Vendor',
+                'created_at' => $message->created_at,
+            ])
+            ->toBase();
+
+        $messages = $customerMessages
+            ->merge($vendorMessages)
+            ->sortByDesc('created_at')
+            ->values();
+
+        return view('admin.contact', [
+            'messages' => $messages,
+            'totalMessages' => $messages->count(),
         ]);
     }
 
