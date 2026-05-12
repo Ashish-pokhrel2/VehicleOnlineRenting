@@ -88,7 +88,7 @@
                                     {{ optional($booking->end_date)->format('n/j/Y') }}
                                 </td>
                                 <td class="px-6 py-6 text-sm font-semibold leading-5" style="color: #101828;">
-                                    ${{ number_format((float) $booking->total_price, 0) }}
+                                    RS {{ number_format((float) $booking->total_price, 0) }}
                                 </td>
                                 <td class="px-6 py-6">
                                     <span

@@ -68,7 +68,7 @@
                         <div class="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 min-w-[220px]">
                             <p class="text-sm text-gray-500">Daily Pricing</p>
                             <p class="mt-2 text-4xl font-bold text-blue-600">
-                                Rs. {{ number_format($vehicle->price_per_day, 0) }}
+                                RS {{ number_format($vehicle->price_per_day, 0) }}
                                 <span class="text-lg font-medium text-gray-500">/day</span>
                             </p>
                         </div>
@@ -146,7 +146,7 @@
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                             <p class="text-sm text-gray-500">Price Per Day</p>
                             <p class="mt-2 text-2xl font-bold text-blue-600">
-                                Rs. {{ number_format($vehicle->price_per_day, 0) }}/day
+                                RS {{ number_format($vehicle->price_per_day, 0) }}/day
                             </p>
                         </div>
 

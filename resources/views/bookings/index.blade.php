@@ -94,7 +94,7 @@
 
                             <div class="booking-info-item">
                                 <span class="booking-label">Total Price</span>
-                                <strong>Rs. {{ number_format($booking->total_price, 0) }}</strong>
+                                <strong>RS {{ number_format($booking->total_price, 0) }}</strong>
                             </div>
 
                             <div class="booking-info-item">

@@ -46,7 +46,7 @@
                     </svg>
                 </div>
                 <p class="text-sm text-slate-600">Total Vendor Revenue</p>
-                <p class="mt-1 text-4xl font-bold text-slate-900">${{ number_format($stats['totalVendorRevenue'], 0) }}</p>
+                <p class="mt-1 text-4xl font-bold text-slate-900">RS {{ number_format($stats['totalVendorRevenue'], 0) }}</p>
                 <p class="mt-2 text-sm text-slate-500">From all bookings</p>
             </div>
 
@@ -156,10 +156,10 @@
 
                                 <!-- Revenue -->
                                 <td class="px-6 py-4">
-                                    <p class="text-[15px] font-semibold text-slate-900">${{ number_format($vendor['totalRevenue'], 2) }}</p>
+                                    <p class="text-[15px] font-semibold text-slate-900">RS {{ number_format($vendor['totalRevenue'], 2) }}</p>
                                     <p class="mt-1 text-[13px] text-slate-500">
                                         @if ($vendor['totalBookings'] > 0)
-                                            Avg: ${{ number_format($vendor['totalRevenue'] / $vendor['totalBookings'], 2) }}
+                                            Avg: RS {{ number_format($vendor['totalRevenue'] / $vendor['totalBookings'], 2) }}
                                         @else
                                             N/A
                                         @endif

@@ -85,7 +85,7 @@
                                     </span>
 
                                     <span class="bg-green-100 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
-                                        Rs. {{ number_format($vehicle->price_per_day, 0) }}/day
+                                        RS {{ number_format($vehicle->price_per_day, 0) }}/day
                                     </span>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Rate Per Day</span>
-                                <span class="font-semibold text-gray-900">Rs. {{ number_format($vehicle->price_per_day, 0) }}</span>
+                                <span class="font-semibold text-gray-900">RS {{ number_format($vehicle->price_per_day, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
@@ -274,17 +274,17 @@
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span id="subtotalValue" class="font-semibold text-gray-900">Rs. {{ number_format($subtotal, 0) }}</span>
+                                <span id="subtotalValue" class="font-semibold text-gray-900">RS {{ number_format($subtotal, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center border-b border-gray-200 pb-3">
                                 <span class="text-gray-600">Service Fee</span>
-                                <span class="font-semibold text-gray-900">Rs. {{ number_format($serviceFee, 0) }}</span>
+                                <span class="font-semibold text-gray-900">RS {{ number_format($serviceFee, 0) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center pt-2">
                                 <span class="text-lg font-semibold text-gray-900">Total Price</span>
-                                <span id="totalPriceValue" class="text-2xl font-bold text-blue-600">Rs. {{ number_format($total, 0) }}</span>
+                                <span id="totalPriceValue" class="text-2xl font-bold text-blue-600">RS {{ number_format($total, 0) }}</span>
                             </div>
                         </div>
 
@@ -395,7 +395,7 @@ function getSelectedDays() {
 }
 
 function formatCurrency(value) {
-    return 'Rs. ' + new Intl.NumberFormat('en-US').format(Math.round(value));
+    return 'RS ' + new Intl.NumberFormat('en-US').format(Math.round(value));
 }
 
 function updateBookingSummary() {

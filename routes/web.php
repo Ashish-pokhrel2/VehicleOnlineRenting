@@ -216,12 +216,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/vendors/{vendor}', [DashboardController::class, 'showVendor'])
             ->name('vendors.show');
 
-        Route::get('/vehicles', function (Request $request) {
-            abort_unless($request->user()?->isAdmin(), 403);
-
-            return view('admin.vehicles');
-        })->name('vehicles');
-
         Route::get('/contact', [DashboardController::class, 'contact'])
             ->name('contact');
 

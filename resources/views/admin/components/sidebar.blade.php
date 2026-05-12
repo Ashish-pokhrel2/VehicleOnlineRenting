@@ -3,7 +3,6 @@
         ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
         ['label' => 'Users', 'route' => 'admin.users'],
         ['label' => 'Vendors', 'route' => 'admin.vendors'],
-        ['label' => 'Vehicles', 'route' => 'admin.vehicles'],
         ['label' => 'Bookings', 'route' => 'admin.bookings'],
         ['label' => 'Contact', 'route' => 'admin.contact'],
     ];
@@ -35,11 +34,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                @elseif ($link['route'] === 'admin.vehicles')
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 12 3l9 4.5M4.5 8.25V16.5L12 21l7.5-4.5V8.25M4.5 8.25 12 12.75l7.5-4.5" />
-                    </svg>
-
                 @else
 
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
