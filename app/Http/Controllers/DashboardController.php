@@ -15,6 +15,8 @@ use App\Models\Vehicles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -67,16 +69,10 @@ class DashboardController extends Controller
                 'vehicle:id,name,image',
                 'customer:id,name',
             ])
-            ->orderBy('id')
+            ->latest('created_at')
+            ->latest('id')
             ->limit(3)
             ->get();
-
-        $recentActivities = [
-            ['title' => 'New booking for Mercedes S-Class', 'time' => '2 hours ago'],
-            ['title' => 'New vendor registered', 'time' => '5 hours ago'],
-            ['title' => 'BMW Convertible added', 'time' => '1 day ago'],
-            ['title' => 'Booking completed for Range Rover', 'time' => '2 days ago'],
-        ];
 
         return view('admin.dashboard', [
             'heldSettlements' => $heldSettlements,
@@ -92,8 +88,77 @@ class DashboardController extends Controller
             ],
             'userDistribution' => $userDistribution,
             'latestBookings' => $latestBookings,
-            'recentActivities' => $recentActivities,
+            'recentActivities' => $this->recentActivities(),
         ]);
+    }
+
+    /**
+     * @return Collection<int, array{title:string, meta:string, time:string, url:string, created_at:Carbon|null}>
+     */
+    private function recentActivities(): Collection
+    {
+        $bookings = Bookings::query()
+            ->with(['vehicle:id,name', 'customer:id,name'])
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(fn (Bookings $booking): array => [
+                'title' => 'Booking #'.$booking->id.' for '.($booking->vehicle?->name ?? 'Unknown Vehicle'),
+                'meta' => ($booking->customer?->name ?? 'Unknown Customer').' - '.$booking->status->value.' - RS '.number_format((float) $booking->total_price, 0),
+                'time' => $booking->created_at?->diffForHumans() ?? 'Time unavailable',
+                'url' => route('admin.bookings'),
+                'created_at' => $booking->created_at,
+            ]);
+
+        $users = User::query()
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(fn (User $user): array => [
+                'title' => ucfirst($user->role->value).' '.$user->name.' registered',
+                'meta' => $user->email,
+                'time' => $user->created_at?->diffForHumans() ?? 'Time unavailable',
+                'url' => $user->isVendor() ? route('admin.vendors') : route('admin.users'),
+                'created_at' => $user->created_at,
+            ]);
+
+        $vehicles = Vehicles::query()
+            ->with('vendor:id,name')
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(fn (Vehicles $vehicle): array => [
+                'title' => $vehicle->name.' added',
+                'meta' => ($vehicle->vendor?->name ?? 'Unknown Vendor').' - RS '.number_format((float) $vehicle->price_per_day, 0).'/day',
+                'time' => $vehicle->created_at?->diffForHumans() ?? 'Time unavailable',
+                'url' => route('vehicles.show', $vehicle),
+                'created_at' => $vehicle->created_at,
+            ]);
+
+        $contacts = Contact::query()
+            ->with('user:id,name')
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(fn (Contact $contact): array => [
+                'title' => 'Contact message: '.$contact->subject,
+                'meta' => ($contact->user?->name ?? 'Customer').' - '.($contact->status?->value ?? 'Pending'),
+                'time' => $contact->created_at?->diffForHumans() ?? 'Time unavailable',
+                'url' => route('admin.contact'),
+                'created_at' => $contact->created_at,
+            ]);
+
+        return $bookings
+            ->merge($users)
+            ->merge($vehicles)
+            ->merge($contacts)
+            ->sortByDesc('created_at')
+            ->take(6)
+            ->values();
     }
 
     public function users(Request $request): View

@@ -38,8 +38,8 @@
                 <h4>Price Range</h4>
                 <input type="range" id="priceRange" min="{{ $priceRange['min'] }}" max="{{ $priceRange['max'] }}" value="{{ $priceRange['max'] }}" style="width:100%">
                 <div class="price-labels">
-                    <span>Rs. {{ number_format($priceRange['min'], 0) }}</span>
-                    <span id="priceDisplay">Rs. {{ number_format($priceRange['max'], 0) }}</span>
+                    <span>RS {{ number_format($priceRange['min'], 0) }}</span>
+                    <span id="priceDisplay">RS {{ number_format($priceRange['max'], 0) }}</span>
                 </div>
             </div>
 
@@ -113,7 +113,7 @@
                             </div>
 
                             <div class="vehicle-footer">
-                                <div class="price">Rs. {{ number_format($vehicle->price_per_day, 0) }}<span>/day</span></div>
+                                <div class="price">RS {{ number_format($vehicle->price_per_day, 0) }}<span>/day</span></div>
                                 <a href="{{ route('vehicles.show', $vehicle) }}" onclick="event.stopPropagation();">View Details →</a>
                             </div>
                         </div>
@@ -138,7 +138,7 @@ const priceDisplay = document.getElementById('priceDisplay');
 const resetBtn = document.getElementById('resetFilters');
 
 function formatRs(value) {
-    return 'Rs. ' + Number(value).toLocaleString('en-US');
+    return 'RS ' + Number(value).toLocaleString('en-US');
 }
 
 function updateCategoryFilters() {

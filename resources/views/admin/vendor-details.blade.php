@@ -76,8 +76,8 @@
                     </svg>
                 </div>
                 <p class="text-sm text-slate-600">Total Revenue</p>
-                <p class="mt-1 text-4xl font-bold text-slate-900">${{ number_format($stats['totalRevenue'], 2) }}</p>
-                <p class="mt-2 text-sm text-slate-500">Avg: ${{ number_format($stats['avgRevenuePerBooking'], 2) }}/booking</p>
+                <p class="mt-1 text-4xl font-bold text-slate-900">RS {{ number_format($stats['totalRevenue'], 2) }}</p>
+                <p class="mt-2 text-sm text-slate-500">Avg: RS {{ number_format($stats['avgRevenuePerBooking'], 2) }}/booking</p>
             </div>
 
             <div class="rounded-2xl border border-black/10 bg-white p-6">
@@ -208,9 +208,9 @@
                             @foreach ($vehicleMetrics as $vehicle)
                                 <tr class="border-b border-black/10 last:border-none">
                                     <td class="px-6 py-4 font-medium">{{ $vehicle['name'] }}</td>
-                                    <td class="px-6 py-4">${{ number_format($vehicle['pricePerDay'], 2) }}</td>
+                                    <td class="px-6 py-4">RS {{ number_format($vehicle['pricePerDay'], 2) }}</td>
                                     <td class="px-6 py-4">{{ $vehicle['bookingCount'] }}</td>
-                                    <td class="px-6 py-4 font-medium">${{ number_format($vehicle['revenue'], 2) }}</td>
+                                    <td class="px-6 py-4 font-medium">RS {{ number_format($vehicle['revenue'], 2) }}</td>
                                     <td class="px-6 py-4">
                                         <span class="rounded px-2 py-1 text-xs font-medium {{ $vehicle['available'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                             {{ $vehicle['available'] ? 'Available' : 'Unavailable' }}
@@ -266,7 +266,7 @@
                                     <td class="px-6 py-4 text-xs">
                                         {{ $booking->start_date->format('M d') }} - {{ $booking->end_date->format('M d, Y') }}
                                     </td>
-                                    <td class="px-6 py-4 font-medium">${{ number_format($booking->total_price, 2) }}</td>
+                                    <td class="px-6 py-4 font-medium">RS {{ number_format($booking->total_price, 2) }}</td>
                                     <td class="px-6 py-4">
                                         <span class="rounded px-2 py-1 text-xs font-medium {{ $statusClass }}">
                                             {{ $booking->status->value }}

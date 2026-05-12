@@ -193,7 +193,7 @@ if ($typeParam === 'cars') {
                                 <span>{{ $vehicle->fuel }}</span>
                             </div>
                             <div class="vehicle-footer">
-                            <div class="price">Rs. {{ number_format($vehicle->price_per_day, 0) }}<span>/day</span></div>
+                            <div class="price">RS {{ number_format($vehicle->price_per_day, 0) }}<span>/day</span></div>
                                 <a href="{{ route('vehicles.show', $vehicle) }}" onclick="event.stopPropagation();">View Details →</a>
                             </div>
                         </div>
@@ -408,7 +408,7 @@ function clearHomeSearchError() {
                         <h4 style="margin:0 0 12px 0;text-align:center;">${vehicle.name}</h4>
                         <p style="margin:0 0 10px 0;color:#111;"><strong>Type:</strong> ${vehicle.category ?? vehicle.type ?? 'N/A'}</p>
                         <p style="margin:0 0 10px 0;color:#111;"><strong>Location:</strong> ${vehicle.location ?? 'N/A'}</p>
-                        <p style="margin:0 0 16px 0;color:#111;"><strong>Price:</strong> Rs. ${Number(vehicle.price_per_day).toLocaleString('en-US')}/day</p>
+                        <p style="margin:0 0 16px 0;color:#111;"><strong>Price:</strong> RS ${Number(vehicle.price_per_day).toLocaleString('en-US')}/day</p>
                         <div style="text-align:center;">
                             <a href="/vehicles/${vehicle.id}" style="display:inline-block;padding:10px 16px;background:#020826;color:#fff;text-decoration:none;border-radius:10px;">View Details</a>
                         </div>
