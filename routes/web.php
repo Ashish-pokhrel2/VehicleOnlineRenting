@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BookingPageController;
+use App\Http\Controllers\CustomerContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -16,6 +17,12 @@ use Illuminate\Support\Facades\Route;
 // ===================== Public Routes =====================
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/contact', [CustomerContactController::class, 'index'])
+    ->name('customer.contact');
+
+Route::post('/contact', [CustomerContactController::class, 'store'])
+    ->name('customer.contact.store');
 
 Route::get('/vehicles/search/ajax', [VehiclePageController::class, 'ajaxSearch'])
     ->name('vehicles.search.ajax');

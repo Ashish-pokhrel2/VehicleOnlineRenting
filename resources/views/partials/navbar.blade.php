@@ -23,6 +23,12 @@
                     My Bookings
                 </a>
             @endif
+
+            @if (! $isAdmin)
+    <a href="{{ route('customer.contact') }}" class="{{ request()->routeIs('customer.contact') ? 'active' : '' }}">
+        Contact
+    </a>
+  @endif
         </nav>
 
         <div class="nav-right desktop-actions">
