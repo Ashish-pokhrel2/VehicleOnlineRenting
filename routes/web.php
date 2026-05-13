@@ -110,6 +110,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return app(VendorDashboardController::class)->index();
         })->name('dashboard');
 
+        Route::get('/earnings', function (Request $request) {
+            abort_unless($request->user()?->isVendor(), 403);
+
+            return app(VendorDashboardController::class)->earnings($request);
+        })->name('earnings');
+
         Route::get('/vehicles', function (Request $request) {
             abort_unless($request->user()?->isVendor(), 403);
 

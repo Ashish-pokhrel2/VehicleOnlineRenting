@@ -219,6 +219,18 @@
                     Bookings
                 </a>
 
+                <!-- Earnings -->
+<a href="{{ route('vendor.earnings') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+   {{ request()->routeIs('vendor.earnings') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.12-4 2.5S9.79 13 12 13s4 1.12 4 2.5S14.21 18 12 18m0-10V6m0 12v-2m8-5a8 8 0 11-16 0 8 8 0 0116 0z" />
+    </svg>
+
+    Earnings
+</a>
+
                 <!-- Reviews -->
                 <a href="{{ route('vendor.reviews.index') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
