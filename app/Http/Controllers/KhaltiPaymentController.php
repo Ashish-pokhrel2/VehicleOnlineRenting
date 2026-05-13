@@ -7,6 +7,7 @@ use App\Enums\BookingSettlementStatus;
 use App\Enums\BookingStatus;
 use App\Models\BookingPayment;
 use App\Models\BookingSettlement;
+use App\Notifications\BookingCreatedNotification;
 use App\Services\KhaltiPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -165,6 +166,11 @@ class KhaltiPaymentController extends Controller
             ]);
 
             $payment->booking->update(['status' => BookingStatus::CONFIRMED]);
+            $payment->booking->loadMissing(['vehicle', 'customer', 'vendor']);
+
+            if ($payment->booking->vendor) {
+                $payment->booking->vendor->notify(new BookingCreatedNotification($payment->booking));
+            }
 
             $settlement = BookingSettlement::firstOrCreate(
                 ['booking_payment_id' => $payment->id],

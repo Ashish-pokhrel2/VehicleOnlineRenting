@@ -2,15 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingPaymentStatus;
 use App\Enums\BookingStatus;
 use App\Http\Requests\Bookings\StoreBookingsRequest;
+use App\Models\BookingPayment;
 use App\Models\Bookings;
+use App\Models\BookingSetting;
 use App\Models\Vehicles;
+use App\Services\KhaltiPaymentService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class BookingsController extends Controller
 {
+    public function __construct(private readonly KhaltiPaymentService $khaltiPaymentService) {}
+
     public function index(Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -31,7 +41,7 @@ class BookingsController extends Controller
         ]);
     }
 
-    public function store(StoreBookingsRequest $request): JsonResponse
+    public function store(StoreBookingsRequest $request): JsonResponse|RedirectResponse
     {
         $vehicle = Vehicles::findOrFail($request->vehicle_id);
 
@@ -45,7 +55,9 @@ class BookingsController extends Controller
         $days = now()->parse($request->start_date)
             ->diffInDays(now()->parse($request->end_date)) + 1;
 
-        $totalPrice = $vehicle->price_per_day * $days;
+        $settings = BookingSetting::query()->latest()->first();
+        $serviceFee = (float) ($settings?->service_fee ?? 0);
+        $totalPrice = ($vehicle->price_per_day * $days) + $serviceFee;
 
         $booking = Bookings::create([
             'vehicle_id' => $request->vehicle_id,
@@ -57,10 +69,40 @@ class BookingsController extends Controller
             'status' => BookingStatus::PENDING,
         ]);
 
+        try {
+            $payment = $this->createKhaltiPayment($booking, $serviceFee);
+            $response = $this->khaltiPaymentService->initiate(
+                $payment,
+                $request->user(),
+                route('khalti.payments.return')
+            );
+
+            $payment->update([
+                'pidx' => $response['pidx'],
+                'payment_url' => $response['payment_url'],
+                'response_payload' => $response,
+                'status' => BookingPaymentStatus::INITIATED,
+                'initiated_at' => now(),
+                'expired_at' => isset($response['expires_at']) ? Carbon::parse($response['expires_at']) : null,
+            ]);
+        } catch (RuntimeException $exception) {
+            $booking->update(['status' => BookingStatus::CANCELLED]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 422);
+        }
+
+        if (! $request->expectsJson()) {
+            return redirect()->away($payment->payment_url);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Booking created successfully',
-            'data' => $booking->load(['vehicle', 'customer:id,name', 'vendor:id,name']),
+            'data' => $booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment']),
+            'payment_url' => $payment->payment_url,
         ], 201);
     }
 
@@ -126,6 +168,29 @@ class BookingsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking deleted successfully',
+        ]);
+    }
+
+    private function createKhaltiPayment(Bookings $booking, float $serviceFee): BookingPayment
+    {
+        $amount = (float) $booking->total_price;
+
+        return BookingPayment::create([
+            'booking_id' => $booking->id,
+            'customer_id' => $booking->customer_id,
+            'vendor_id' => $booking->vendor_id,
+            'purchase_order_id' => 'booking-'.$booking->id.'-'.Str::upper(Str::random(8)),
+            'purchase_order_name' => 'Vehicle booking #'.$booking->id,
+            'amount' => $amount,
+            'service_fee' => $serviceFee,
+            'net_amount' => max(0, $amount - $serviceFee),
+            'return_url' => route('khalti.payments.return'),
+            'website_url' => config('app.url'),
+            'status' => BookingPaymentStatus::INITIATED,
+            'request_payload' => [
+                'booking_id' => $booking->id,
+                'payment_method' => 'khalti',
+            ],
         ]);
     }
 }

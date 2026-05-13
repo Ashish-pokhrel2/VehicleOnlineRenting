@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Bookings extends Model
 {
@@ -50,6 +51,16 @@ class Bookings extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'vendor_id');
+    }
+
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(BookingPayment::class, 'booking_id')->latestOfMany();
+    }
+
+    public function latestSettlement(): HasOne
+    {
+        return $this->hasOne(BookingSettlement::class, 'booking_id')->latestOfMany();
     }
 
     public function scopePending($query)

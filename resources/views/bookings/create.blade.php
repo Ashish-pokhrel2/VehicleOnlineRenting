@@ -234,6 +234,49 @@
                             </div>
                         </div>
                     </div>
+
+                    @unless ($editingBooking)
+                        <div
+                            id="paymentMethodSection"
+                            class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 {{ old('payment_method') ? '' : 'hidden' }}"
+                        >
+                            <h2 class="text-xl font-semibold text-gray-900 mb-5">Payment Method</h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
+                                    <div class="flex items-start gap-3">
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value="cod"
+                                            class="mt-1"
+                                            @checked(old('payment_method') === 'cod')
+                                        >
+                                        <div>
+                                            <span class="block font-semibold text-gray-900">Cash on Delivery</span>
+                                            <span class="block text-sm text-gray-500 mt-1">Confirm the booking now and pay at pickup.</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-purple-400 transition">
+                                    <div class="flex items-start gap-3">
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value="khalti"
+                                            class="mt-1"
+                                            @checked(old('payment_method') === 'khalti')
+                                        >
+                                        <div>
+                                            <span class="block font-semibold text-gray-900">Khalti Sandbox</span>
+                                            <span class="block text-sm text-gray-500 mt-1">Continue to Khalti sandbox after booking details are saved.</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    @endunless
                 </div>
 
                 <div>
@@ -290,18 +333,21 @@
 
                         <div class="mt-6 space-y-3">
                             <button
-                                type="submit"
-                                form="bookingForm"
-                                class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition"
+                                type="button"
+                                id="proceedToPaymentButton"
+                                class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition {{ old('payment_method') ? 'hidden' : '' }}"
                             >
-                                Confirm Booking
+                                Proceed to Payment
                             </button>
 
                             <button
-                                type="button"
-                                class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition"
+                                type="submit"
+                                form="bookingForm"
+                                id="confirmBookingButton"
+                                class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition {{ old('payment_method') || $editingBooking ? '' : 'hidden' }}"
+                                @unless (old('payment_method') || $editingBooking) disabled @endunless
                             >
-                                Proceed to Payment
+                                Confirm Booking
                             </button>
 
                             <a
@@ -313,7 +359,7 @@
                         </div>
 
                         <p class="text-xs text-gray-400 mt-5 leading-6">
-                            Booking confirmation, payment processing, and final availability checking will be handled by backend integration.
+                            Choose cash on delivery to submit the booking, or Khalti Sandbox to pay online before confirmation.
                         </p>
                     </div>
                 </div>
@@ -335,6 +381,9 @@ const endDateInput = document.querySelector('[name="end_date"]');
 const estimatedDaysValue = document.getElementById('estimatedDaysValue');
 const subtotalValue = document.getElementById('subtotalValue');
 const totalPriceValue = document.getElementById('totalPriceValue');
+const paymentMethodSection = document.getElementById('paymentMethodSection');
+const proceedToPaymentButton = document.getElementById('proceedToPaymentButton');
+const confirmBookingButton = document.getElementById('confirmBookingButton');
 
 const fields = [
     { name: 'start_date', label: 'Pick-up Date' },
@@ -416,6 +465,32 @@ function updateBookingSummary() {
     totalPriceValue.textContent = formatCurrency(totalPrice);
 }
 
+function selectedPaymentMethod() {
+    const checkedPaymentMethod = document.querySelector('[name="payment_method"]:checked');
+
+    return checkedPaymentMethod ? checkedPaymentMethod.value : null;
+}
+
+function showPaymentMethods() {
+    if (!paymentMethodSection || !proceedToPaymentButton || !confirmBookingButton) {
+        return;
+    }
+
+    paymentMethodSection.classList.remove('hidden');
+    proceedToPaymentButton.classList.add('hidden');
+    confirmBookingButton.classList.remove('hidden');
+    confirmBookingButton.disabled = selectedPaymentMethod() === null;
+    paymentMethodSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updatePaymentButtonState() {
+    if (!confirmBookingButton) {
+        return;
+    }
+
+    confirmBookingButton.disabled = selectedPaymentMethod() === null;
+}
+
 fields.forEach(function(field) {
     const input = document.querySelector('[name="' + field.name + '"]');
 
@@ -445,6 +520,14 @@ if (endDateInput) {
 }
 
 updateBookingSummary();
+if (proceedToPaymentButton) {
+    proceedToPaymentButton.addEventListener('click', showPaymentMethods);
+}
+
+document.querySelectorAll('[name="payment_method"]').forEach(function(input) {
+    input.addEventListener('change', updatePaymentButtonState);
+});
+updatePaymentButtonState();
 
 bookingForm.addEventListener('submit', function(e) {
     let hasError = false;
@@ -468,6 +551,29 @@ bookingForm.addEventListener('submit', function(e) {
         if (firstError) {
             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
+        return false;
+    }
+
+    if (paymentMethodSection && paymentMethodSection.classList.contains('hidden')) {
+        e.preventDefault();
+        e.stopPropagation();
+        showPaymentMethods();
+
+        return false;
+    }
+
+    if (selectedPaymentMethod() === null) {
+        e.preventDefault();
+        e.stopPropagation();
+        showPaymentMethods();
+
+        return false;
+    }
+
+    if (selectedPaymentMethod() === 'cod' && !window.confirm('Confirm this cash on delivery booking?')) {
+        e.preventDefault();
+        e.stopPropagation();
 
         return false;
     }

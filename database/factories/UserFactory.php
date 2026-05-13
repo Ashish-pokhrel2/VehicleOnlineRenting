@@ -66,4 +66,14 @@ class UserFactory extends Factory
             'role' => UserRole::CUSTOMER,
         ]);
     }
+
+    /**
+     * Create an admin user.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::ADMIN,
+        ]);
+    }
 }

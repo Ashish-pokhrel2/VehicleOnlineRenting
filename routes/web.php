@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\BookingPageController;
+use App\Http\Controllers\BookingSettlementController;
 use App\Http\Controllers\CustomerContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KhaltiPaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePageController;
 use App\Http\Controllers\Vendor\VendorReviewController;
@@ -80,6 +82,9 @@ Route::middleware('auth')->group(function () {
         return app(BookingPageController::class)
             ->cancel($request, Bookings::findOrFail($booking));
     })->name('bookings.page.cancel');
+
+    Route::get('/payments/khalti/return', [KhaltiPaymentController::class, 'callback'])
+        ->name('khalti.payments.return');
 });
 
 // ===================== Authenticated Routes =====================
@@ -227,6 +232,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/bookings', [DashboardController::class, 'bookings'])
             ->name('bookings');
+
+        Route::post('/bookings/{booking}/settle', [BookingSettlementController::class, 'store'])
+            ->name('bookings.settle');
     });
 });
 

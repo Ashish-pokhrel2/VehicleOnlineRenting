@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingPaymentStatus;
 use App\Enums\BookingStatus;
+use App\Models\BookingPayment;
 use App\Models\Bookings;
 use App\Models\BookingSetting;
 use App\Models\PickupTimeSlot;
@@ -10,15 +12,20 @@ use App\Models\Vehicles;
 use App\Notifications\BookingCancelledNotification;
 use App\Notifications\BookingCreatedNotification;
 use App\Notifications\BookingUpdatedNotification;
+use App\Services\KhaltiPaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 class BookingPageController extends Controller
 {
+    public function __construct(private readonly KhaltiPaymentService $khaltiPaymentService) {}
+
     public function index(): View
     {
         $this->ensureCustomer();
@@ -94,10 +101,12 @@ class BookingPageController extends Controller
                 ->withInput();
         }
 
+        $settings = BookingSetting::query()->latest()->first();
         $pricing = $this->calculateBookingPricing(
             $validated['start_date'],
             $validated['end_date'],
-            $vehicle->price_per_day
+            $vehicle->price_per_day,
+            (float) ($settings?->service_fee ?? 0)
         );
 
         $booking = Bookings::create([
@@ -116,15 +125,44 @@ class BookingPageController extends Controller
             'status' => BookingStatus::PENDING,
         ]);
 
-        $booking->loadMissing(['vehicle', 'customer', 'vendor']);
+        if (($validated['payment_method'] ?? 'cod') === 'cod') {
+            $booking->loadMissing(['vehicle', 'customer', 'vendor']);
 
-        if ($booking->vendor) {
-            $booking->vendor->notify(new BookingCreatedNotification($booking));
+            if ($booking->vendor) {
+                $booking->vendor->notify(new BookingCreatedNotification($booking));
+            }
+
+            return redirect()
+                ->route('user.bookings')
+                ->with('success', 'Booking request submitted successfully. Please pay by cash on delivery.');
         }
 
-        return redirect()
-            ->route('user.bookings')
-            ->with('success', 'Booking confirmed successfully.');
+        try {
+            $payment = $this->createKhaltiPayment($booking, $pricing['service_fee']);
+            $response = $this->khaltiPaymentService->initiate(
+                $payment,
+                $request->user(),
+                route('khalti.payments.return')
+            );
+
+            $payment->update([
+                'pidx' => $response['pidx'],
+                'payment_url' => $response['payment_url'],
+                'response_payload' => $response,
+                'status' => BookingPaymentStatus::INITIATED,
+                'initiated_at' => now(),
+                'expired_at' => isset($response['expires_at']) ? Carbon::parse($response['expires_at']) : null,
+            ]);
+
+            return redirect()->away($response['payment_url']);
+        } catch (RuntimeException $exception) {
+            $booking->update(['status' => BookingStatus::CANCELLED]);
+
+            return redirect()
+                ->route('bookings.create', $vehicle)
+                ->withErrors(['payment_method' => $exception->getMessage()])
+                ->withInput();
+        }
     }
 
     public function update(Request $request, Bookings $booking): RedirectResponse
@@ -240,17 +278,44 @@ class BookingPageController extends Controller
             'email' => 'required|email|max:255',
             'citizenship_id' => 'required|string|max:255',
             'special_request' => 'required|string|max:2000',
+            'payment_method' => 'sometimes|required|in:cod,khalti',
         ]);
     }
 
-    private function calculateBookingPricing(string $startDate, string $endDate, float $pricePerDay): array
+    private function calculateBookingPricing(string $startDate, string $endDate, float $pricePerDay, float $serviceFee = 0): array
     {
         $days = max(1, Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)));
+        $subtotal = $pricePerDay * $days;
 
         return [
             'days' => $days,
-            'total_price' => $pricePerDay * $days,
+            'subtotal' => $subtotal,
+            'service_fee' => $serviceFee,
+            'total_price' => $subtotal + $serviceFee,
         ];
+    }
+
+    private function createKhaltiPayment(Bookings $booking, float $serviceFee): BookingPayment
+    {
+        $amount = (float) $booking->total_price;
+
+        return BookingPayment::create([
+            'booking_id' => $booking->id,
+            'customer_id' => $booking->customer_id,
+            'vendor_id' => $booking->vendor_id,
+            'purchase_order_id' => 'booking-'.$booking->id.'-'.Str::upper(Str::random(8)),
+            'purchase_order_name' => 'Vehicle booking #'.$booking->id,
+            'amount' => $amount,
+            'service_fee' => $serviceFee,
+            'net_amount' => max(0, $amount - $serviceFee),
+            'return_url' => route('khalti.payments.return'),
+            'website_url' => config('app.url'),
+            'status' => BookingPaymentStatus::INITIATED,
+            'request_payload' => [
+                'booking_id' => $booking->id,
+                'payment_method' => 'khalti',
+            ],
+        ]);
     }
 
     private function resolveEstimatedDays(Request $request, int $defaultDays, ?Bookings $booking = null): int
