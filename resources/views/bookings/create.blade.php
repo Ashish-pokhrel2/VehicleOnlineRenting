@@ -242,7 +242,7 @@
                         >
                             <h2 class="text-xl font-semibold text-gray-900 mb-5">Payment Method</h2>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
                                     <div class="flex items-start gap-3">
                                         <input
@@ -260,18 +260,38 @@
                                 </label>
 
                                 <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-purple-400 transition">
-                                    <div class="flex items-start gap-3">
+                                    <div class="flex items-center gap-4">
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="khalti"
-                                            class="mt-1"
+                                            class="shrink-0"
                                             @checked(old('payment_method') === 'khalti')
                                         >
-                                        <div>
-                                            <span class="block font-semibold text-gray-900">Khalti Sandbox</span>
-                                            <span class="block text-sm text-gray-500 mt-1">Continue to Khalti sandbox after booking details are saved.</span>
-                                        </div>
+                                        <img
+                                            src="{{ asset('images/logo/khltilogo.png') }}"
+                                            alt="Khalti Sandbox"
+                                            class="h-14 w-full max-w-40 object-contain"
+                                            loading="lazy"
+                                        >
+                                    </div>
+                                </label>
+
+                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-green-400 transition">
+                                    <div class="flex items-center gap-4">
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value="esewa"
+                                            class="shrink-0"
+                                            @checked(old('payment_method') === 'esewa')
+                                        >
+                                        <img
+                                            src="{{ asset('images/logo/esewalogo.gif') }}"
+                                            alt="eSewa Sandbox"
+                                            class="h-14 w-full max-w-40 object-contain"
+                                            loading="lazy"
+                                        >
                                     </div>
                                 </label>
                             </div>
@@ -359,7 +379,7 @@
                         </div>
 
                         <p class="text-xs text-gray-400 mt-5 leading-6">
-                            Choose cash on delivery to submit the booking, or Khalti Sandbox to pay online before confirmation.
+                            Choose cash on delivery to submit the booking, or Khalti/eSewa sandbox to pay online before confirmation.
                         </p>
                     </div>
                 </div>

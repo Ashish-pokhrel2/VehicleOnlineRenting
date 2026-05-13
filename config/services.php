@@ -40,4 +40,11 @@ return [
         'secret_key' => env('KHALTI_SECRET_KEY'),
     ],
 
+    'esewa' => [
+        'epay_url' => env('ESEWA_EPAY_URL', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form'),
+        'status_url' => env('ESEWA_STATUS_URL', 'https://rc.esewa.com.np/api/epay/transaction/status'),
+        'product_code' => env('ESEWA_PRODUCT_CODE', 'EPAYTEST'),
+        'secret_key' => env('ESEWA_SECRET_KEY', env('ESEWA_ACCESS_KEY')),
+    ],
+
 ];

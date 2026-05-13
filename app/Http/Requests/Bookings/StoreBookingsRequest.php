@@ -20,6 +20,7 @@ class StoreBookingsRequest extends FormRequest
             'vehicle_id' => ['required', 'exists:vehicles,id'],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after:start_date'],
+            'payment_method' => ['sometimes', 'required', 'in:khalti,esewa'],
         ];
     }
 

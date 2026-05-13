@@ -4,6 +4,7 @@ use App\Http\Controllers\BookingPageController;
 use App\Http\Controllers\BookingSettlementController;
 use App\Http\Controllers\CustomerContactController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EsewaPaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KhaltiPaymentController;
 use App\Http\Controllers\ProfileController;
@@ -85,6 +86,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payments/khalti/return', [KhaltiPaymentController::class, 'callback'])
         ->name('khalti.payments.return');
+
+    Route::get('/payments/esewa/success/{payment}', [EsewaPaymentController::class, 'success'])
+        ->name('esewa.payments.success');
+
+    Route::get('/payments/esewa/failure/{payment}', [EsewaPaymentController::class, 'failure'])
+        ->name('esewa.payments.failure');
 });
 
 // ===================== Authenticated Routes =====================

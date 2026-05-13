@@ -12,6 +12,7 @@ use App\Models\Vehicles;
 use App\Notifications\BookingCancelledNotification;
 use App\Notifications\BookingCreatedNotification;
 use App\Notifications\BookingUpdatedNotification;
+use App\Services\EsewaEpayPaymentService;
 use App\Services\KhaltiPaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class BookingPageController extends Controller
 {
-    public function __construct(private readonly KhaltiPaymentService $khaltiPaymentService) {}
+    public function __construct(
+        private readonly KhaltiPaymentService $khaltiPaymentService,
+        private readonly EsewaEpayPaymentService $esewaPaymentService
+    ) {}
 
     public function index(): View
     {
@@ -84,7 +88,7 @@ class BookingPageController extends Controller
         return $this->renderBookingForm($request, $booking->vehicle, $booking);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|View
     {
         $this->ensureCustomer();
 
@@ -125,7 +129,9 @@ class BookingPageController extends Controller
             'status' => BookingStatus::PENDING,
         ]);
 
-        if (($validated['payment_method'] ?? 'cod') === 'cod') {
+        $paymentMethod = $validated['payment_method'] ?? 'cod';
+
+        if ($paymentMethod === 'cod') {
             $booking->loadMissing(['vehicle', 'customer', 'vendor']);
 
             if ($booking->vendor) {
@@ -138,6 +144,29 @@ class BookingPageController extends Controller
         }
 
         try {
+            if ($paymentMethod === 'esewa') {
+                $payment = $this->createEsewaPayment($booking, $pricing['service_fee']);
+                $payload = $this->esewaPaymentService->paymentPayload(
+                    $payment,
+                    route('esewa.payments.success', $payment),
+                    route('esewa.payments.failure', $payment)
+                );
+
+                $payment->update([
+                    'pidx' => $payment->purchase_order_id,
+                    'payment_url' => $this->esewaPaymentService->epayUrl(),
+                    'response_payload' => $payload,
+                    'return_url' => route('esewa.payments.success', $payment),
+                    'status' => BookingPaymentStatus::INITIATED,
+                    'initiated_at' => now(),
+                ]);
+
+                return view('payments.esewa-redirect', [
+                    'epayUrl' => $this->esewaPaymentService->epayUrl(),
+                    'payload' => $payload,
+                ]);
+            }
+
             $payment = $this->createKhaltiPayment($booking, $pricing['service_fee']);
             $response = $this->khaltiPaymentService->initiate(
                 $payment,
@@ -278,7 +307,7 @@ class BookingPageController extends Controller
             'email' => 'required|email|max:255',
             'citizenship_id' => 'required|string|max:255',
             'special_request' => 'required|string|max:2000',
-            'payment_method' => 'sometimes|required|in:cod,khalti',
+            'payment_method' => 'sometimes|required|in:cod,khalti,esewa',
         ]);
     }
 
@@ -314,6 +343,28 @@ class BookingPageController extends Controller
             'request_payload' => [
                 'booking_id' => $booking->id,
                 'payment_method' => 'khalti',
+            ],
+        ]);
+    }
+
+    private function createEsewaPayment(Bookings $booking, float $serviceFee): BookingPayment
+    {
+        $amount = (float) $booking->total_price;
+
+        return BookingPayment::create([
+            'booking_id' => $booking->id,
+            'customer_id' => $booking->customer_id,
+            'vendor_id' => $booking->vendor_id,
+            'purchase_order_id' => 'booking-'.$booking->id.'-'.Str::upper(Str::random(8)),
+            'purchase_order_name' => 'Vehicle booking #'.$booking->id,
+            'amount' => $amount,
+            'service_fee' => $serviceFee,
+            'net_amount' => max(0, $amount - $serviceFee),
+            'website_url' => config('app.url'),
+            'status' => BookingPaymentStatus::INITIATED,
+            'request_payload' => [
+                'booking_id' => $booking->id,
+                'payment_method' => 'esewa',
             ],
         ]);
     }

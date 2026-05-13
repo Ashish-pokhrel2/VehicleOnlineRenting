@@ -8,6 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('reviews')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                if (! Schema::hasColumn('reviews', 'booking_id')) {
+                    $table->foreignId('booking_id')
+                        ->nullable()
+                        ->after('id')
+                        ->constrained('bookings')
+                        ->nullOnDelete();
+                }
+
+                if (! Schema::hasColumn('reviews', 'vendor_reply')) {
+                    $table->text('vendor_reply')->nullable()->after('comment');
+                }
+            });
+
+            return;
+        }
+
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
 
@@ -28,6 +46,18 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('reviews');
+        if (! Schema::hasTable('reviews')) {
+            return;
+        }
+
+        Schema::table('reviews', function (Blueprint $table) {
+            if (Schema::hasColumn('reviews', 'booking_id')) {
+                $table->dropConstrainedForeignId('booking_id');
+            }
+
+            if (Schema::hasColumn('reviews', 'vendor_reply')) {
+                $table->dropColumn('vendor_reply');
+            }
+        });
     }
 };
