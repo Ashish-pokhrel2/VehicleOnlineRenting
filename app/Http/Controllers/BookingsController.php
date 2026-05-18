@@ -76,6 +76,8 @@ class BookingsController extends Controller
 
         $paymentMethod = $request->input('payment_method', 'khalti');
 
+        $payment = null;
+
         try {
             if ($paymentMethod === 'esewa') {
                 $payment = $this->createEsewaPayment($booking, $serviceFee);
@@ -112,6 +114,16 @@ class BookingsController extends Controller
             }
         } catch (RuntimeException $exception) {
             $booking->update(['status' => BookingStatus::CANCELLED]);
+
+            if ($payment instanceof BookingPayment) {
+                $payment->update([
+                    'status' => BookingPaymentStatus::FAILED,
+                    'lookup_payload' => [
+                        'error' => $exception->getMessage(),
+                    ],
+                    'verified_at' => now(),
+                ]);
+            }
 
             return response()->json([
                 'success' => false,
