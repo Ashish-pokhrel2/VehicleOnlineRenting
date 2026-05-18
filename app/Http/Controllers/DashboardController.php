@@ -199,8 +199,10 @@ class DashboardController extends Controller
         $bookings = Bookings::query()
             ->with([
                 'vehicle:id,name,image',
-                'customer:id,name',
-                'vendor:id,name',
+                'customer:id,name,email',
+                'vendor:id,name,email',
+                'latestPayment',
+                'latestSettlement',
             ])
             ->when(
                 $search !== '',
