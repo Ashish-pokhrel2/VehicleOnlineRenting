@@ -38,6 +38,9 @@ return [
     'khalti' => [
         'base_url' => env('KHALTI_BASE_URL', 'https://dev.khalti.com/api/v2'),
         'secret_key' => env('KHALTI_SECRET_KEY'),
+        'timeout' => env('KHALTI_TIMEOUT', 10),
+        'connect_timeout' => env('KHALTI_CONNECT_TIMEOUT', 3),
+        'verify_checkout_url' => env('KHALTI_VERIFY_CHECKOUT_URL', false),
     ],
 
     'esewa' => [

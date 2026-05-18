@@ -143,6 +143,8 @@ class BookingPageController extends Controller
                 ->with('success', 'Booking request submitted successfully. Please pay by cash on delivery.');
         }
 
+        $payment = null;
+
         try {
             if ($paymentMethod === 'esewa') {
                 $payment = $this->createEsewaPayment($booking, $pricing['service_fee']);
@@ -186,6 +188,16 @@ class BookingPageController extends Controller
             return redirect()->away($response['payment_url']);
         } catch (RuntimeException $exception) {
             $booking->update(['status' => BookingStatus::CANCELLED]);
+
+            if ($payment instanceof BookingPayment) {
+                $payment->update([
+                    'status' => BookingPaymentStatus::FAILED,
+                    'lookup_payload' => [
+                        'error' => $exception->getMessage(),
+                    ],
+                    'verified_at' => now(),
+                ]);
+            }
 
             return redirect()
                 ->route('bookings.create', $vehicle)
