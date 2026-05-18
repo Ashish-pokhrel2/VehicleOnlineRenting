@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingStatus;
 use App\Enums\VehicleType;
+use App\Models\Bookings;
 use App\Models\Vehicles;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,14 +93,36 @@ class VehiclePageController extends Controller
             $vehicleImages = [$vehicle->image];
         }
 
-        // Create a simple customer-facing availability label.
-        $availabilityLabel = $vehicle->available ? 'Available Now' : 'Currently Unavailable';
+        // Check if this vehicle already has an active booking.
+        // Pending and Confirmed bookings block new customer bookings.
+        // Cancelled bookings do not block the vehicle from being booked again.
+        $blockingBookingStatuses = [
+            BookingStatus::PENDING,
+            BookingStatus::CONFIRMED,
+        ];
+
+        $hasActiveBooking = Bookings::where('vehicle_id', $vehicle->id)
+            ->whereIn('status', $blockingBookingStatuses)
+            ->exists();
+
+        $isBookable = (bool) $vehicle->available && ! $hasActiveBooking;
+
+        // Create a customer-facing availability label.
+        if (! $vehicle->available) {
+            $availabilityLabel = 'Currently Unavailable';
+        } elseif ($hasActiveBooking) {
+            $availabilityLabel = 'Already Booked';
+        } else {
+            $availabilityLabel = 'Available Now';
+        }
 
         // Send selected vehicle data to the detail page.
         return view('vehicles.show', [
             'vehicle' => $vehicle,
             'vehicleImages' => $vehicleImages,
             'availabilityLabel' => $availabilityLabel,
+            'isBookable' => $isBookable,
+            'hasActiveBooking' => $hasActiveBooking,
             'isLoading' => false,
             'errorMessage' => null,
         ]);
@@ -132,6 +156,14 @@ class VehiclePageController extends Controller
                     ->orWhereRaw('LOWER(type) LIKE ?', ['%' . $singularType . '%']);
             });
         }
+
+        // Exclude vehicles that already have pending or confirmed bookings.
+        $query->whereDoesntHave('bookings', function ($bookingQuery) {
+            $bookingQuery->whereIn('status', [
+                BookingStatus::PENDING,
+                BookingStatus::CONFIRMED,
+            ]);
+        });
 
         // Fetch matching vehicles with vendor details.
         $vehicles = $query->with('vendor:id,name')->orderBy('id')->get();

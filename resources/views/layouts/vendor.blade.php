@@ -19,12 +19,19 @@
 <div class="min-h-screen">
 
     <!-- Top Navbar -->
-    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-8">
         <div class="flex items-center gap-3">
+            <button type="button" id="mobileMenuButton"
+                    class="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
             <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent" class="h-10 w-auto">
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
 
             <!-- Notification Bell -->
             <div class="relative">
@@ -51,7 +58,7 @@
 
                 <!-- Notification Dropdown -->
                 <div id="notificationDropdown"
-     class="hidden absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                     class="hidden absolute right-0 mt-3 w-[320px] sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
 
                     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                         <div>
@@ -159,7 +166,7 @@
                 </div>
             </div>
 
-            <span class="px-4 py-2 rounded-full bg-gray-100 text-sm font-medium">
+            <span class="hidden sm:inline-flex px-4 py-2 rounded-full bg-gray-100 text-sm font-medium">
                 Vendor
             </span>
 
@@ -171,16 +178,67 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H9m4 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                     </svg>
 
-                    Logout
+                    <span class="hidden sm:inline">Logout</span>
                 </button>
             </form>
         </div>
     </header>
 
+    <!-- Mobile Overlay -->
+    <div id="mobileSidebarOverlay" class="hidden fixed inset-0 bg-black/40 z-40 lg:hidden"></div>
+
+    <!-- Mobile Sidebar -->
+    <aside id="mobileSidebar"
+           class="fixed top-0 left-0 h-full w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 lg:hidden border-r border-gray-200 px-5 py-6">
+
+        <div class="flex items-center justify-between mb-6">
+            <img src="{{ asset('images/logo/logo.png') }}" alt="VehicleRent" class="h-10 w-auto">
+
+            <button type="button" id="mobileMenuClose"
+                    class="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <nav class="space-y-2">
+            <a href="{{ route('vendor.dashboard') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('vendor.vehicles.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.vehicles.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Vehicles</span>
+            </a>
+
+            <a href="{{ route('vendor.bookings.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.bookings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Bookings</span>
+            </a>
+
+            <a href="{{ route('vendor.earnings') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.earnings') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Earnings</span>
+            </a>
+
+            <a href="{{ route('vendor.reviews.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.reviews.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Reviews</span>
+            </a>
+
+            <a href="{{ route('vendor.contact') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('vendor.contact') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <span>Contact</span>
+            </a>
+        </nav>
+    </aside>
+
     <div class="flex">
 
-        <!-- Sidebar -->
-        <aside class="w-64 min-h-[calc(100vh-64px)] bg-white border-r border-gray-200 px-5 py-6">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:block w-64 min-h-[calc(100vh-64px)] bg-white border-r border-gray-200 px-5 py-6">
             <nav class="space-y-2">
 
                 <!-- Dashboard -->
@@ -220,16 +278,16 @@
                 </a>
 
                 <!-- Earnings -->
-<a href="{{ route('vendor.earnings') }}"
-   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-   {{ request()->routeIs('vendor.earnings') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
+                <a href="{{ route('vendor.earnings') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                   {{ request()->routeIs('vendor.earnings') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100' }}">
 
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.12-4 2.5S9.79 13 12 13s4 1.12 4 2.5S14.21 18 12 18m0-10V6m0 12v-2m8-5a8 8 0 11-16 0 8 8 0 0116 0z" />
-    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.12-4 2.5S9.79 13 12 13s4 1.12 4 2.5S14.21 18 12 18m0-10V6m0 12v-2m8-5a8 8 0 11-16 0 8 8 0 0116 0z" />
+                    </svg>
 
-    Earnings
-</a>
+                    Earnings
+                </a>
 
                 <!-- Reviews -->
                 <a href="{{ route('vendor.reviews.index') }}"
@@ -259,12 +317,13 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-4 sm:p-6 overflow-x-hidden">
             @yield('content')
         </main>
 
     </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -288,6 +347,36 @@
                     dropdown.classList.add('hidden');
                 }
             });
+        }
+
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const mobileSidebarOverlay = document.getElementById('mobileSidebarOverlay');
+
+        function openMobileSidebar() {
+            mobileSidebar.classList.remove('-translate-x-full');
+            mobileSidebarOverlay.classList.remove('hidden');
+        }
+
+        function closeMobileSidebar() {
+            mobileSidebar.classList.add('-translate-x-full');
+            mobileSidebarOverlay.classList.add('hidden');
+        }
+
+        if (mobileMenuButton && mobileSidebar && mobileSidebarOverlay) {
+            mobileMenuButton.addEventListener('click', function (event) {
+                event.stopPropagation();
+                openMobileSidebar();
+            });
+        }
+
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', closeMobileSidebar);
+        }
+
+        if (mobileSidebarOverlay) {
+            mobileSidebarOverlay.addEventListener('click', closeMobileSidebar);
         }
     });
 </script>

@@ -22,6 +22,25 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="mb-6 bg-white border border-red-200 rounded-xl p-4 text-red-600">
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @php
+            $canBookVehicle = $isBookable ?? $vehicle->available;
+            $vehicleHasActiveBooking = $hasActiveBooking ?? false;
+
+            $availabilityBadgeClass = $canBookVehicle
+                ? 'bg-green-100 text-green-700'
+                : 'bg-red-100 text-red-700';
+        @endphp
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <div class="lg:col-span-2 space-y-8">
@@ -56,7 +75,7 @@
                                 <span class="bg-blue-100 text-blue-700 text-sm font-medium px-4 py-2 rounded-full">
                                     {{ $vehicle->category }}
                                 </span>
-                                <span class="bg-green-100 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
+                                <span class="{{ $availabilityBadgeClass }} text-sm font-medium px-4 py-2 rounded-full">
                                     {{ $availabilityLabel }}
                                 </span>
                                 <span class="bg-yellow-100 text-yellow-700 text-sm font-medium px-4 py-2 rounded-full">
@@ -152,7 +171,9 @@
 
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                             <p class="text-sm text-gray-500">Availability</p>
-                            <p class="mt-2 font-semibold text-gray-900">{{ $availabilityLabel }}</p>
+                            <p class="mt-2 font-semibold {{ $canBookVehicle ? 'text-green-700' : 'text-red-700' }}">
+                                {{ $availabilityLabel }}
+                            </p>
                         </div>
 
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -161,29 +182,35 @@
                         </div>
                     </div>
 
-<div class="mt-6 space-y-3">
-    @if($vehicle->available)
-        <a href="{{ route('bookings.create', $vehicle) }}"
-           class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition">
-            Book Now
-        </a>
-    @else
-        <button type="button"
-                disabled
-                class="block w-full cursor-not-allowed text-center bg-gray-300 text-gray-500 py-4 rounded-xl font-semibold">
-            Currently Unavailable
-        </button>
-    @endif
+                    <div class="mt-6 space-y-3">
+                        @if($canBookVehicle)
+                            <a href="{{ route('bookings.create', $vehicle) }}"
+                               class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition">
+                                Book Now
+                            </a>
+                        @else
+                            <button type="button"
+                                    disabled
+                                    class="block w-full cursor-not-allowed text-center bg-gray-300 text-gray-500 py-4 rounded-xl font-semibold">
+                                {{ $vehicleHasActiveBooking ? 'Already Booked' : 'Currently Unavailable' }}
+                            </button>
 
-    <a href="{{ route('vehicles.index') }}"
-       class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition">
-        Back to Listing
-    </a>
-</div>
+                            <p class="text-xs text-red-500 leading-5">
+                                {{ $vehicleHasActiveBooking
+                                    ? 'This vehicle already has an active booking, so it cannot be booked again until the current booking is cancelled or completed.'
+                                    : 'This vehicle is currently unavailable for booking.' }}
+                            </p>
+                        @endif
 
-<p class="text-xs text-gray-400 mt-5 leading-6">
-    Final booking validation and confirmation will be handled by backend integration.
-</p>
+                        <a href="{{ route('vehicles.index') }}"
+                           class="block w-full text-center bg-white border border-gray-300 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition">
+                            Back to Listing
+                        </a>
+                    </div>
+
+                    <p class="text-xs text-gray-400 mt-5 leading-6">
+                        Final booking validation and confirmation will be handled by backend integration.
+                    </p>
                 </div>
             </div>
 

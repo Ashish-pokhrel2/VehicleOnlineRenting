@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BookingPayment;
 use App\Models\User;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -42,14 +43,7 @@ class KhaltiPaymentService
             'merchant_extra' => (string) $payment->booking_id,
         ];
 
-        $response = Http::baseUrl($baseUrl)
-            ->acceptJson()
-            ->asJson()
-            ->timeout(15)
-            ->connectTimeout(5)
-            ->withHeaders([
-                'Authorization' => 'Key '.$secretKey,
-            ])
+        $response = $this->khaltiRequest($baseUrl, $secretKey)
             ->post('/epayment/initiate/', $payload);
 
         if (! $response->successful()) {
@@ -74,14 +68,7 @@ class KhaltiPaymentService
             throw new RuntimeException('Khalti secret key is not configured.');
         }
 
-        $response = Http::baseUrl($baseUrl)
-            ->acceptJson()
-            ->asJson()
-            ->timeout(15)
-            ->connectTimeout(5)
-            ->withHeaders([
-                'Authorization' => 'Key '.$secretKey,
-            ])
+        $response = $this->khaltiRequest($baseUrl, $secretKey)
             ->post('/epayment/lookup/', [
                 'pidx' => $pidx,
             ]);
@@ -97,6 +84,24 @@ class KhaltiPaymentService
         }
 
         return $data;
+    }
+
+    private function khaltiRequest(string $baseUrl, string $secretKey): PendingRequest
+    {
+        $request = Http::baseUrl($baseUrl)
+            ->acceptJson()
+            ->asJson()
+            ->timeout(15)
+            ->connectTimeout(5)
+            ->withHeaders([
+                'Authorization' => 'Key '.$secretKey,
+            ]);
+
+        if (config('services.payment.verify_ssl') === false) {
+            $request = $request->withoutVerifying();
+        }
+
+        return $request;
     }
 
     private function normalizePhone(User $customer): string

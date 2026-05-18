@@ -173,7 +173,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/bookings', function (Request $request) {
             abort_unless($request->user()?->isVendor(), 403);
 
-            return app(VendorBookingController::class)->index();
+           return app(VendorBookingController::class)->index($request);
         })->name('bookings.index');
 
         Route::patch('/bookings/{booking}/confirm', function (Request $request, $booking) {

@@ -18,11 +18,21 @@
                 <span class="mobile-menu-title">VehicleRent</span>
                 <button class="mobile-close-btn" id="mobileCloseBtn" type="button">✕</button>
             </div>
-            <nav class="mobile-nav-links">
-                <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('vehicles.index') }}">Vehicles</a>
-                <a href="{{ route('user.bookings') }}">My Bookings</a>
-            </nav>
+           <nav class="mobile-nav-links">
+    <a href="{{ route('home') }}">Home</a>
+
+    <a href="{{ route('vehicles.index') }}">
+        Vehicles
+    </a>
+
+    <a href="{{ route('user.bookings') }}">
+        My Bookings
+    </a>
+
+    <a href="{{ route('customer.contact') }}">
+        Contact
+    </a>
+</nav>
             <div class="mobile-auth-links">
                 @auth
                     <form method="POST" action="{{ route('logout') }}">

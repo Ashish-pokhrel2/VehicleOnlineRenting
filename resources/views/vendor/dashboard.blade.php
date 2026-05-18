@@ -34,7 +34,7 @@
             <p class="text-[10px] text-gray-400 mt-1">All booking requests</p>
         </a>
 
-        <a href="{{ route('vendor.bookings.index') }}" class="block bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition">
+        <a href="{{ route('vendor.earnings') }}" class="block bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition">
             <div class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-8 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -45,7 +45,7 @@
             <p class="text-[10px] text-gray-400 mt-1">Confirmed bookings only</p>
         </a>
 
-        <a href="{{ route('vendor.bookings.index') }}" class="block bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition">
+        <a href="{{ route('vendor.bookings.index', ['status' => 'Pending']) }}" class="block bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition">
             <div class="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -202,7 +202,7 @@
                     <div class="flex gap-0.5 text-yellow-400">
                         @for($i = 0; $i < 5; $i++)
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-3 h-3" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.447 1.287 3.966c.3.921-.755 1.688-1.538 1.118L10 13.348l-3.368 2.886c-.783.57-1.838-.197-1.538-1.118l1.287-3.966-3.368-2.447c-.783-.570-.38-1.81.588-1.81h4.162l1.286-3.966z"/>
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.447 1.287 3.966c.3.921-.755 1.688-1.538 1.118L10 13.348l-3.368 2.886c-.783.570-1.838-.197-1.538-1.118l1.287-3.966-3.368-2.447c-.783-.570-.38-1.81.588-1.81h4.162l1.286-3.966z"/>
                             </svg>
                         @endfor
                     </div>

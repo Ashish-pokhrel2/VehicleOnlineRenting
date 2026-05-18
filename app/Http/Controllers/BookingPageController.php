@@ -40,10 +40,16 @@ class BookingPageController extends Controller
         if (! auth()->check()) {
             $errorMessage = 'Sign in to view your bookings.';
         } else {
-            $bookings = Bookings::with(['vehicle', 'vendor:id,name'])
-                ->where('customer_id', auth()->id())
-                ->latest()
-                ->get();
+            
+$bookings = Bookings::with(['vehicle', 'vendor:id,name'])
+    ->where('customer_id', auth()->id())
+    ->latest()
+    ->get()
+    ->unique(function ($booking) {
+        return $booking->vehicle_id . '-' . ($booking->status->value ?? $booking->status);
+    })
+    ->values();
+
         }
 
         $statusClasses = [
@@ -69,6 +75,19 @@ class BookingPageController extends Controller
             $vehicle->available,
             Response::HTTP_FORBIDDEN,
             'This vehicle is currently unavailable for booking.'
+        );
+
+        $hasActiveBooking = Bookings::where('vehicle_id', $vehicle->id)
+            ->whereIn('status', [
+                BookingStatus::PENDING,
+                BookingStatus::CONFIRMED,
+            ])
+            ->exists();
+
+        abort_if(
+            $hasActiveBooking,
+            Response::HTTP_FORBIDDEN,
+            'This vehicle has already been booked.'
         );
 
         return $this->renderBookingForm($request, $vehicle);
@@ -101,6 +120,22 @@ class BookingPageController extends Controller
                 ->route('vehicles.show', $vehicle)
                 ->withErrors([
                     'vehicle' => 'This vehicle is currently unavailable for booking.',
+                ])
+                ->withInput();
+        }
+
+        $hasActiveBooking = Bookings::where('vehicle_id', $vehicle->id)
+            ->whereIn('status', [
+                BookingStatus::PENDING,
+                BookingStatus::CONFIRMED,
+            ])
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return redirect()
+                ->route('vehicles.show', $vehicle)
+                ->withErrors([
+                    'vehicle' => 'This vehicle has already been booked.',
                 ])
                 ->withInput();
         }

@@ -243,13 +243,13 @@
                             <h2 class="text-xl font-semibold text-gray-900 mb-5">Payment Method</h2>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
-                                    <div class="flex items-start gap-3">
+                                <label class="payment-card block border-2 border-gray-200 rounded-xl p-5 cursor-pointer hover:border-blue-500 hover:bg-blue-50/40 transition">
+                                    <div class="flex items-start gap-4">
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="cod"
-                                            class="mt-1"
+                                            class="payment-radio mt-1"
                                             @checked(old('payment_method') === 'cod')
                                         >
                                         <div>
@@ -259,13 +259,13 @@
                                     </div>
                                 </label>
 
-                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-purple-400 transition">
+                                <label class="payment-card block border-2 border-gray-200 rounded-xl p-5 cursor-pointer hover:border-purple-500 hover:bg-purple-50/40 transition">
                                     <div class="flex items-center gap-4">
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="khalti"
-                                            class="shrink-0"
+                                            class="payment-radio shrink-0"
                                             @checked(old('payment_method') === 'khalti')
                                         >
                                         <img
@@ -277,13 +277,13 @@
                                     </div>
                                 </label>
 
-                                <label class="block border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-green-400 transition">
+                                <label class="payment-card block border-2 border-gray-200 rounded-xl p-5 cursor-pointer hover:border-green-500 hover:bg-green-50/40 transition">
                                     <div class="flex items-center gap-4">
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="esewa"
-                                            class="shrink-0"
+                                            class="payment-radio shrink-0"
                                             @checked(old('payment_method') === 'esewa')
                                         >
                                         <img
@@ -355,7 +355,7 @@
                             <button
                                 type="button"
                                 id="proceedToPaymentButton"
-                                class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition {{ old('payment_method') ? 'hidden' : '' }}"
+                                class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition {{ old('payment_method') ? 'hidden' : '' }}"
                             >
                                 Proceed to Payment
                             </button>
@@ -364,7 +364,7 @@
                                 type="submit"
                                 form="bookingForm"
                                 id="confirmBookingButton"
-                                class="block w-full text-center bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition {{ old('payment_method') || $editingBooking ? '' : 'hidden' }}"
+                                class="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition {{ old('payment_method') || $editingBooking ? '' : 'hidden' }}"
                                 @unless (old('payment_method') || $editingBooking) disabled @endunless
                             >
                                 Confirm Booking
@@ -393,6 +393,28 @@
                 data-service-fee="{{ (float) $serviceFee }}"
             ></div>
 
+            <div id="codConfirmModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/40 px-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+                    <h3 class="text-xl font-bold text-gray-900">
+                        Confirm Cash on Delivery Booking?
+                    </h3>
+
+                    <p class="text-sm text-gray-500 mt-3">
+                        You selected Cash on Delivery. Please confirm to submit your booking.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3 mt-6">
+                        <button type="button" id="cancelCodModal" class="py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition">
+                            Cancel
+                        </button>
+
+                        <button type="button" id="confirmCodModal" class="py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+                            Yes, Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <script>
 const bookingForm = document.getElementById('bookingForm');
 const pricingData = document.getElementById('bookingPricingData');
@@ -404,6 +426,9 @@ const totalPriceValue = document.getElementById('totalPriceValue');
 const paymentMethodSection = document.getElementById('paymentMethodSection');
 const proceedToPaymentButton = document.getElementById('proceedToPaymentButton');
 const confirmBookingButton = document.getElementById('confirmBookingButton');
+const codConfirmModal = document.getElementById('codConfirmModal');
+const cancelCodModal = document.getElementById('cancelCodModal');
+const confirmCodModal = document.getElementById('confirmCodModal');
 
 const fields = [
     { name: 'start_date', label: 'Pick-up Date' },
@@ -491,6 +516,21 @@ function selectedPaymentMethod() {
     return checkedPaymentMethod ? checkedPaymentMethod.value : null;
 }
 
+function updatePaymentCardSelection() {
+    document.querySelectorAll('.payment-card').forEach(function(card) {
+        card.classList.remove('border-blue-600', 'bg-blue-50');
+    });
+
+    const checkedPaymentMethod = document.querySelector('[name="payment_method"]:checked');
+
+    if (checkedPaymentMethod) {
+        const selectedCard = checkedPaymentMethod.closest('.payment-card');
+        if (selectedCard) {
+            selectedCard.classList.add('border-blue-600', 'bg-blue-50');
+        }
+    }
+}
+
 function showPaymentMethods() {
     if (!paymentMethodSection || !proceedToPaymentButton || !confirmBookingButton) {
         return;
@@ -509,6 +549,25 @@ function updatePaymentButtonState() {
     }
 
     confirmBookingButton.disabled = selectedPaymentMethod() === null;
+    updatePaymentCardSelection();
+}
+
+function openCodModal() {
+    if (!codConfirmModal) {
+        return;
+    }
+
+    codConfirmModal.classList.remove('hidden');
+    codConfirmModal.classList.add('flex');
+}
+
+function closeCodModal() {
+    if (!codConfirmModal) {
+        return;
+    }
+
+    codConfirmModal.classList.add('hidden');
+    codConfirmModal.classList.remove('flex');
 }
 
 fields.forEach(function(field) {
@@ -540,6 +599,7 @@ if (endDateInput) {
 }
 
 updateBookingSummary();
+
 if (proceedToPaymentButton) {
     proceedToPaymentButton.addEventListener('click', showPaymentMethods);
 }
@@ -547,7 +607,20 @@ if (proceedToPaymentButton) {
 document.querySelectorAll('[name="payment_method"]').forEach(function(input) {
     input.addEventListener('change', updatePaymentButtonState);
 });
+
 updatePaymentButtonState();
+
+if (cancelCodModal) {
+    cancelCodModal.addEventListener('click', closeCodModal);
+}
+
+if (confirmCodModal) {
+    confirmCodModal.addEventListener('click', function() {
+        bookingForm.dataset.confirmedCod = 'true';
+        closeCodModal();
+        bookingForm.submit();
+    });
+}
 
 bookingForm.addEventListener('submit', function(e) {
     let hasError = false;
@@ -591,9 +664,10 @@ bookingForm.addEventListener('submit', function(e) {
         return false;
     }
 
-    if (selectedPaymentMethod() === 'cod' && !window.confirm('Confirm this cash on delivery booking?')) {
+    if (selectedPaymentMethod() === 'cod' && !bookingForm.dataset.confirmedCod) {
         e.preventDefault();
         e.stopPropagation();
+        openCodModal();
 
         return false;
     }

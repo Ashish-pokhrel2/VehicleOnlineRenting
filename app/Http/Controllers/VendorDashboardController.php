@@ -8,7 +8,6 @@ use App\Models\Vehicles;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class VendorDashboardController extends Controller
 {
@@ -18,21 +17,25 @@ class VendorDashboardController extends Controller
 
         $totalVehicles = Vehicles::where('vendor_id', $vendorId)->count();
 
-        $totalBookings = Bookings::where('vendor_id', $vendorId)->count();
+        $allBookings = Bookings::with(['vehicle', 'customer'])
+            ->where('vendor_id', $vendorId)
+            ->latest()
+            ->get();
 
-        $pendingRequests = Bookings::where('vendor_id', $vendorId)
+        $uniqueBookings = $this->uniqueBookings($allBookings);
+
+        $totalBookings = $uniqueBookings->count();
+
+        $pendingRequests = $uniqueBookings
             ->where('status', BookingStatus::PENDING)
             ->count();
 
-        $totalRevenue = Bookings::where('vendor_id', $vendorId)
+        $totalRevenue = $uniqueBookings
             ->where('status', BookingStatus::CONFIRMED)
             ->sum('total_price');
 
-        $recentBookings = Bookings::with(['vehicle', 'customer'])
-            ->where('vendor_id', $vendorId)
-            ->latest()
-            ->take(5)
-            ->get();
+        $recentBookings = $uniqueBookings
+            ->take(5);
 
         $topVehicles = Vehicles::where('vendor_id', $vendorId)
             ->orderByDesc('rating')
@@ -61,53 +64,75 @@ class VendorDashboardController extends Controller
 
         $today = Carbon::today();
 
-        $totalEarnings = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CONFIRMED)
-            ->sum('total_price');
-
-        $thisMonthEarnings = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CONFIRMED)
-            ->whereBetween('created_at', [
-                Carbon::now()->startOfMonth(),
-                Carbon::now()->endOfMonth(),
-            ])
-            ->sum('total_price');
-
-        $pendingPayments = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::PENDING)
-            ->sum('total_price');
-
-        $confirmedBookings = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CONFIRMED)
-            ->count();
-
-        $pendingBookings = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::PENDING)
-            ->count();
-
-        $cancelledBookings = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CANCELLED)
-            ->count();
-
-        $activeRentals = Bookings::where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CONFIRMED)
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->count();
-
-        $transactions = Bookings::with(['vehicle', 'customer'])
+        $allBookings = Bookings::with(['vehicle', 'customer'])
             ->where('vendor_id', $vendorId)
             ->latest()
-            ->take(10)
             ->get();
 
-        $topEarningVehicle = Bookings::with('vehicle')
-            ->select('vehicle_id', DB::raw('SUM(total_price) as total_earned'), DB::raw('COUNT(*) as total_bookings'))
-            ->where('vendor_id', $vendorId)
-            ->where('status', BookingStatus::CONFIRMED)
+        $uniqueBookings = $this->uniqueBookings($allBookings);
+
+        $confirmedUniqueBookings = $uniqueBookings
+            ->where('status', BookingStatus::CONFIRMED);
+
+        $pendingUniqueBookings = $uniqueBookings
+            ->where('status', BookingStatus::PENDING);
+
+        $cancelledUniqueBookings = $uniqueBookings
+            ->where('status', BookingStatus::CANCELLED);
+
+        $totalEarnings = $confirmedUniqueBookings
+            ->sum('total_price');
+
+        $thisMonthEarnings = $confirmedUniqueBookings
+            ->filter(function ($booking) {
+                return $booking->created_at
+                    && $booking->created_at->between(
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    );
+            })
+            ->sum('total_price');
+
+        $pendingPayments = $pendingUniqueBookings
+            ->sum('total_price');
+
+        $confirmedBookings = $confirmedUniqueBookings
+            ->count();
+
+        $pendingBookings = $pendingUniqueBookings
+            ->count();
+
+        $cancelledBookings = $cancelledUniqueBookings
+            ->count();
+
+        $activeRentals = $confirmedUniqueBookings
+            ->filter(function ($booking) use ($today) {
+                return $booking->start_date
+                    && $booking->end_date
+                    && Carbon::parse($booking->start_date)->lte($today)
+                    && Carbon::parse($booking->end_date)->gte($today);
+            })
+            ->count();
+
+        $transactions = $uniqueBookings
+            ->take(10);
+
+        $topEarningVehicleGroup = $confirmedUniqueBookings
             ->groupBy('vehicle_id')
-            ->orderByDesc('total_earned')
+            ->map(function ($group) {
+                $firstBooking = $group->first();
+
+                return (object) [
+                    'vehicle_id' => $firstBooking?->vehicle_id,
+                    'vehicle' => $firstBooking?->vehicle,
+                    'total_earned' => $group->sum('total_price'),
+                    'total_bookings' => $group->count(),
+                ];
+            })
+            ->sortByDesc('total_earned')
             ->first();
+
+        $topEarningVehicle = $topEarningVehicleGroup;
 
         $chartLabels = [];
         $chartValues = [];
@@ -118,9 +143,11 @@ class VendorDashboardController extends Controller
 
                 $chartLabels[] = $date->format('D');
 
-                $chartValues[] = (float) Bookings::where('vendor_id', $vendorId)
-                    ->where('status', BookingStatus::CONFIRMED)
-                    ->whereDate('created_at', $date)
+                $chartValues[] = (float) $confirmedUniqueBookings
+                    ->filter(function ($booking) use ($date) {
+                        return $booking->created_at
+                            && $booking->created_at->isSameDay($date);
+                    })
                     ->sum('total_price');
             }
         } else {
@@ -129,10 +156,12 @@ class VendorDashboardController extends Controller
 
                 $chartLabels[] = $month->format('M');
 
-                $chartValues[] = (float) Bookings::where('vendor_id', $vendorId)
-                    ->where('status', BookingStatus::CONFIRMED)
-                    ->whereYear('created_at', $month->year)
-                    ->whereMonth('created_at', $month->month)
+                $chartValues[] = (float) $confirmedUniqueBookings
+                    ->filter(function ($booking) use ($month) {
+                        return $booking->created_at
+                            && $booking->created_at->year === $month->year
+                            && $booking->created_at->month === $month->month;
+                    })
                     ->sum('total_price');
             }
         }
@@ -154,5 +183,14 @@ class VendorDashboardController extends Controller
             'chartValues',
             'maxChartValue'
         ));
+    }
+
+    private function uniqueBookings($bookings)
+    {
+        return $bookings
+            ->unique(function ($booking) {
+                return $booking->vehicle_id . '-' . ($booking->status->value ?? $booking->status);
+            })
+            ->values();
     }
 }
