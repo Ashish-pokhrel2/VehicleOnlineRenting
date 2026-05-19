@@ -24,7 +24,7 @@ class KhaltiPaymentController extends Controller
         $validated = $request->validate([
             'pidx' => ['required', 'string'],
             'status' => ['required', 'string'],
-            'purchase_order_id' => ['required', 'string'],
+            'purchase_order_id' => ['nullable', 'string'],
         ]);
 
         try {
@@ -75,11 +75,15 @@ class KhaltiPaymentController extends Controller
             $paymentQuery = BookingPayment::query()
                 ->with(['booking', 'customer'])
                 ->lockForUpdate()
-                ->where('pidx', $validated['pidx'])
-                ->where('purchase_order_id', $validated['purchase_order_id'])
-                ->first();
+                ->where('pidx', $validated['pidx']);
 
-            $payment = $paymentQuery;
+            if (! empty($validated['purchase_order_id'])) {
+                $paymentQuery->where('purchase_order_id', $validated['purchase_order_id']);
+            }
+
+            $payment = $paymentQuery->first();
+
+            $returnStatus = (string) ($validated['status'] ?? '');
 
             if (! $payment) {
                 throw new RuntimeException('Payment record not found.');
@@ -91,6 +95,32 @@ class KhaltiPaymentController extends Controller
                     'booking' => $payment->booking,
                     'payment' => $payment,
                     'settlement' => $payment->settlement,
+                ];
+            }
+
+            if (in_array($returnStatus, ['User canceled', 'Expired'], true)) {
+                $failedStatus = $returnStatus === 'Expired'
+                    ? BookingPaymentStatus::EXPIRED
+                    : BookingPaymentStatus::CANCELED;
+
+                $payment->update([
+                    'status' => $failedStatus,
+                    'lookup_payload' => [
+                        'status' => $returnStatus,
+                        'source' => 'khalti_return',
+                    ],
+                    'verified_at' => now(),
+                ]);
+
+                $payment->booking->update(['status' => BookingStatus::CANCELLED]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Khalti payment was not completed.',
+                    'booking' => $payment->booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment', 'latestSettlement']),
+                    'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
+                    'settlement' => $payment->settlement,
+                    'lookup' => $payment->lookup_payload,
                 ];
             }
 
