@@ -58,13 +58,6 @@
                             @php
                                 $status = $booking->status->value;
                                 $style = $statusStyles[$status] ?? ['bg' => '#F3F4F6', 'text' => '#374151'];
-                                $customerEmail = $booking->customer?->email;
-                                $vendorEmail = $booking->vendor?->email;
-                                $payment = $booking->latestPayment;
-                                $settlement = $booking->latestSettlement;
-                                $canReleaseSettlement = $payment
-                                    && $payment->status === \App\Enums\BookingPaymentStatus::COMPLETED
-                                    && (! $settlement || $settlement->status !== \App\Enums\BookingSettlementStatus::RELEASED);
                             @endphp
                             <tr class="border-b border-black/10 last:border-none">
                                 <td class="px-6 py-6 text-sm font-medium leading-5" style="color: #101828;">
@@ -107,74 +100,17 @@
                                 </td>
                                 <td class="px-6 py-6">
                                     <div class="flex justify-end">
-                                        <x-dropdown align="right" width="48">
-                                            <x-slot name="trigger">
-                                                <button
-                                                    type="button"
-                                                    class="inline-flex h-8 w-9 items-center justify-center rounded-lg transition hover:bg-slate-100"
-                                                    aria-label="Actions"
-                                                >
-                                                    <svg class="h-4 w-4" style="color: #0A0A0A;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                        <circle cx="12" cy="6" r="1.5" fill="currentColor" stroke="none" />
-                                                        <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
-                                                        <circle cx="12" cy="18" r="1.5" fill="currentColor" stroke="none" />
-                                                    </svg>
-                                                </button>
-                                            </x-slot>
-                                            <x-slot name="content">
-                                                @if ($booking->vehicle)
-                                                    <x-dropdown-link href="{{ route('vehicles.show', $booking->vehicle) }}">
-                                                        View vehicle
-                                                    </x-dropdown-link>
-                                                @else
-                                                    <span class="block w-full px-4 py-2 text-start text-sm leading-5 text-slate-400">
-                                                        View vehicle
-                                                    </span>
-                                                @endif
-
-                                                @if ($booking->vendor)
-                                                    <x-dropdown-link href="{{ route('admin.vendors.show', $booking->vendor) }}">
-                                                        View vendor
-                                                    </x-dropdown-link>
-                                                @else
-                                                    <span class="block w-full px-4 py-2 text-start text-sm leading-5 text-slate-400">
-                                                        View vendor
-                                                    </span>
-                                                @endif
-
-                                                @if ($customerEmail)
-                                                    <x-dropdown-link href="mailto:{{ $customerEmail }}">
-                                                        Email customer
-                                                    </x-dropdown-link>
-                                                @else
-                                                    <span class="block w-full px-4 py-2 text-start text-sm leading-5 text-slate-400">
-                                                        Email customer
-                                                    </span>
-                                                @endif
-
-                                                @if ($vendorEmail)
-                                                    <x-dropdown-link href="mailto:{{ $vendorEmail }}">
-                                                        Email vendor
-                                                    </x-dropdown-link>
-                                                @else
-                                                    <span class="block w-full px-4 py-2 text-start text-sm leading-5 text-slate-400">
-                                                        Email vendor
-                                                    </span>
-                                                @endif
-
-                                                @if ($canReleaseSettlement)
-                                                    <form method="POST" action="{{ route('admin.bookings.settle', $booking) }}">
-                                                        @csrf
-                                                        <button
-                                                            type="submit"
-                                                            class="block w-full px-4 py-2 text-start text-sm leading-5 text-emerald-700 hover:bg-emerald-50 focus:outline-none focus:bg-emerald-50 transition duration-150 ease-in-out"
-                                                        >
-                                                            Release settlement
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </x-slot>
-                                        </x-dropdown>
+                                        <button
+                                            type="button"
+                                            class="inline-flex h-8 w-9 items-center justify-center rounded-lg transition hover:bg-slate-100"
+                                            aria-label="Actions"
+                                        >
+                                            <svg class="h-4 w-4" style="color: #0A0A0A;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="6" r="1.5" fill="currentColor" stroke="none" />
+                                                <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                                                <circle cx="12" cy="18" r="1.5" fill="currentColor" stroke="none" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -191,3 +127,4 @@
         </div>
     </section>
 @endsection
+

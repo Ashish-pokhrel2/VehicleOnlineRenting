@@ -62,12 +62,4 @@ class BookingsPolicy
     {
         return false;
     }
-
-    /**
-     * Determine whether the user can release a booking settlement.
-     */
-    public function settle(User $user, Bookings $bookings): bool
-    {
-        return $user->isAdmin();
-    }
 }

@@ -4,17 +4,21 @@ namespace App\Services;
 
 use App\Models\BookingPayment;
 use App\Models\User;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class KhaltiPaymentService
 {
     public function initiate(BookingPayment $payment, User $customer, string $returnUrl): array
     {
+        $secretKey = config('services.khalti.secret_key');
+        $baseUrl = rtrim((string) config('services.khalti.base_url'), '/');
+
+        if ($secretKey === '' || $secretKey === null) {
+            throw new RuntimeException('Khalti secret key is not configured.');
+        }
+
         $payload = [
             'return_url' => $returnUrl,
             'website_url' => config('app.url'),
@@ -39,14 +43,17 @@ class KhaltiPaymentService
             'merchant_extra' => (string) $payment->booking_id,
         ];
 
-        $data = $this->post('/epayment/initiate/', $payload, 'initiate');
+        $response = $this->khaltiRequest($baseUrl, $secretKey)
+            ->post('/epayment/initiate/', $payload);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Unable to initiate Khalti payment.');
+        }
+
+        $data = $response->json();
 
         if (! is_array($data) || empty($data['pidx']) || empty($data['payment_url'])) {
             throw new RuntimeException('Khalti returned an invalid initiation response.');
-        }
-
-        if (config('services.khalti.verify_checkout_url')) {
-            $this->verifyCheckoutUrl((string) $data['payment_url']);
         }
 
         return $data;
@@ -54,9 +61,23 @@ class KhaltiPaymentService
 
     public function lookup(string $pidx): array
     {
-        $data = $this->post('/epayment/lookup/', [
-            'pidx' => $pidx,
-        ], 'lookup');
+        $secretKey = config('services.khalti.secret_key');
+        $baseUrl = rtrim((string) config('services.khalti.base_url'), '/');
+
+        if ($secretKey === '' || $secretKey === null) {
+            throw new RuntimeException('Khalti secret key is not configured.');
+        }
+
+        $response = $this->khaltiRequest($baseUrl, $secretKey)
+            ->post('/epayment/lookup/', [
+                'pidx' => $pidx,
+            ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Unable to verify Khalti payment.');
+        }
+
+        $data = $response->json();
 
         if (! is_array($data)) {
             throw new RuntimeException('Khalti returned an invalid lookup response.');
@@ -70,8 +91,8 @@ class KhaltiPaymentService
         $request = Http::baseUrl($baseUrl)
             ->acceptJson()
             ->asJson()
-            ->timeout((int) config('services.khalti.timeout', 10))
-            ->connectTimeout((int) config('services.khalti.connect_timeout', 3))
+            ->timeout(15)
+            ->connectTimeout(5)
             ->withHeaders([
                 'Authorization' => 'Key '.$secretKey,
             ]);
@@ -81,89 +102,6 @@ class KhaltiPaymentService
         }
 
         return $request;
-    }
-
-    private function post(string $endpoint, array $payload, string $operation): array
-    {
-        $secretKey = config('services.khalti.secret_key');
-        $baseUrl = rtrim((string) config('services.khalti.base_url'), '/');
-
-        if ($secretKey === '' || $secretKey === null) {
-            throw new RuntimeException('Khalti secret key is not configured.');
-        }
-
-        if ($baseUrl === '') {
-            throw new RuntimeException('Khalti base URL is not configured.');
-        }
-
-        $startedAt = microtime(true);
-
-        try {
-            $response = $this->khaltiRequest($baseUrl, $secretKey)
-                ->post($endpoint, $payload);
-        } catch (ConnectionException $exception) {
-            $this->logRequest('warning', $operation, null, $startedAt, [
-                'error' => $exception->getMessage(),
-            ]);
-
-            throw new RuntimeException(
-                'Khalti payment gateway is not reachable right now. Please try again in a moment.',
-                0,
-                $exception
-            );
-        }
-
-        $this->logRequest($response->successful() ? 'info' : 'warning', $operation, $response, $startedAt);
-
-        if (! $response->successful()) {
-            throw new RuntimeException("Unable to {$operation} Khalti payment.");
-        }
-
-        $data = $response->json();
-
-        if (! is_array($data)) {
-            throw new RuntimeException("Khalti returned an invalid {$operation} response.");
-        }
-
-        return $data;
-    }
-
-    private function verifyCheckoutUrl(string $paymentUrl): void
-    {
-        $startedAt = microtime(true);
-
-        try {
-            $request = Http::timeout(5)
-                ->connectTimeout(3);
-
-            if (config('services.payment.verify_ssl') === false) {
-                $request = $request->withoutVerifying();
-            }
-
-            $response = $request->get($paymentUrl);
-        } catch (ConnectionException $exception) {
-            $this->logRequest('warning', 'checkout_url', null, $startedAt, [
-                'error' => $exception->getMessage(),
-            ]);
-
-            throw new RuntimeException('Khalti checkout page is currently unavailable.', 0, $exception);
-        }
-
-        $this->logRequest($response->successful() ? 'info' : 'warning', 'checkout_url', $response, $startedAt);
-
-        if (! $response->successful()) {
-            throw new RuntimeException('Khalti checkout page is currently unavailable.');
-        }
-    }
-
-    private function logRequest(string $level, string $operation, ?Response $response, float $startedAt, array $context = []): void
-    {
-        Log::log($level, 'Khalti payment request completed.', array_filter([
-            'operation' => $operation,
-            'status' => $response?->status(),
-            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'response' => $response && ! $response->successful() ? $response->json() : null,
-        ] + $context, fn ($value): bool => $value !== null));
     }
 
     private function normalizePhone(User $customer): string

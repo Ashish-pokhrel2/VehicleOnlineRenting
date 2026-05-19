@@ -71,66 +71,17 @@ class KhaltiPaymentController extends Controller
 
     private function verifyPayment(array $validated): array
     {
-        $payment = BookingPayment::query()
-            ->with(['booking', 'customer'])
-            ->where('pidx', $validated['pidx'])
-            ->where('purchase_order_id', $validated['purchase_order_id'])
-            ->first();
-
-        if (! $payment) {
-            throw new RuntimeException('Payment record not found.');
-        }
-
-        if (in_array($payment->status, [BookingPaymentStatus::COMPLETED, BookingPaymentStatus::REFUNDED], true)) {
-            return [
-                'success' => true,
-                'booking' => $payment->booking,
-                'payment' => $payment,
-                'settlement' => $payment->settlement,
-            ];
-        }
-
-        try {
-            $lookup = $this->khaltiPaymentService->lookup($validated['pidx']);
-        } catch (RuntimeException $exception) {
-            return DB::transaction(function () use ($payment, $exception): array {
-                $lockedPayment = BookingPayment::query()
-                    ->with(['booking', 'customer'])
-                    ->lockForUpdate()
-                    ->findOrFail($payment->id);
-
-                if (in_array($lockedPayment->status, [BookingPaymentStatus::COMPLETED, BookingPaymentStatus::REFUNDED], true)) {
-                    return [
-                        'success' => true,
-                        'booking' => $lockedPayment->booking,
-                        'payment' => $lockedPayment,
-                        'settlement' => $lockedPayment->settlement,
-                    ];
-                }
-
-                $lockedPayment->update([
-                    'status' => BookingPaymentStatus::PENDING,
-                    'lookup_payload' => [
-                        'error' => $exception->getMessage(),
-                    ],
-                    'verified_at' => now(),
-                ]);
-
-                return [
-                    'success' => false,
-                    'message' => 'Khalti payment verification is temporarily unavailable. Please try again in a moment.',
-                    'booking' => $lockedPayment->booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment', 'latestSettlement']),
-                    'payment' => $lockedPayment->fresh(['booking', 'customer', 'vendor', 'settlement']),
-                    'settlement' => $lockedPayment->settlement,
-                ];
-            }, 3);
-        }
-
-        $result = DB::transaction(function () use ($validated, $lookup, $payment): array {
+        return DB::transaction(function () use ($validated): array {
             $payment = BookingPayment::query()
                 ->with(['booking', 'customer'])
                 ->lockForUpdate()
-                ->findOrFail($payment->id);
+                ->where('pidx', $validated['pidx'])
+                ->where('purchase_order_id', $validated['purchase_order_id'])
+                ->first();
+
+            if (! $payment) {
+                throw new RuntimeException('Payment record not found.');
+            }
 
             if (in_array($payment->status, [BookingPaymentStatus::COMPLETED, BookingPaymentStatus::REFUNDED], true)) {
                 return [
@@ -138,10 +89,10 @@ class KhaltiPaymentController extends Controller
                     'booking' => $payment->booking,
                     'payment' => $payment,
                     'settlement' => $payment->settlement,
-                    'notify_vendor' => false,
                 ];
             }
 
+            $lookup = $this->khaltiPaymentService->lookup($validated['pidx']);
             $expectedAmount = (int) round($payment->amount * 100);
             $lookupAmount = (int) ($lookup['total_amount'] ?? 0);
             $lookupStatus = (string) ($lookup['status'] ?? '');
@@ -160,7 +111,6 @@ class KhaltiPaymentController extends Controller
                     'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
                     'settlement' => $payment->settlement,
                     'lookup' => $lookup,
-                    'notify_vendor' => false,
                 ];
             }
 
@@ -186,7 +136,6 @@ class KhaltiPaymentController extends Controller
                     'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
                     'settlement' => $payment->settlement,
                     'lookup' => $lookup,
-                    'notify_vendor' => false,
                 ];
             }
 
@@ -206,7 +155,6 @@ class KhaltiPaymentController extends Controller
                     'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
                     'settlement' => $payment->settlement,
                     'lookup' => $lookup,
-                    'notify_vendor' => false,
                 ];
             }
 
@@ -219,6 +167,10 @@ class KhaltiPaymentController extends Controller
 
             $payment->booking->update(['status' => BookingStatus::CONFIRMED]);
             $payment->booking->loadMissing(['vehicle', 'customer', 'vendor']);
+
+            if ($payment->booking->vendor) {
+                $payment->booking->vendor->notify(new BookingCreatedNotification($payment->booking));
+            }
 
             $settlement = BookingSettlement::firstOrCreate(
                 ['booking_payment_id' => $payment->id],
@@ -239,16 +191,7 @@ class KhaltiPaymentController extends Controller
                 'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
                 'settlement' => $settlement,
                 'lookup' => $lookup,
-                'notify_vendor' => true,
             ];
         }, 3);
-
-        if (($result['notify_vendor'] ?? false) && $result['booking']->vendor) {
-            $result['booking']->vendor->notify(new BookingCreatedNotification($result['booking']));
-        }
-
-        unset($result['notify_vendor']);
-
-        return $result;
     }
 }
