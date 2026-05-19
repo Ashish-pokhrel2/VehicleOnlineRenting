@@ -72,12 +72,14 @@ class KhaltiPaymentController extends Controller
     private function verifyPayment(array $validated): array
     {
         return DB::transaction(function () use ($validated): array {
-            $payment = BookingPayment::query()
+            $paymentQuery = BookingPayment::query()
                 ->with(['booking', 'customer'])
                 ->lockForUpdate()
                 ->where('pidx', $validated['pidx'])
                 ->where('purchase_order_id', $validated['purchase_order_id'])
                 ->first();
+
+            $payment = $paymentQuery;
 
             if (! $payment) {
                 throw new RuntimeException('Payment record not found.');
@@ -97,23 +99,6 @@ class KhaltiPaymentController extends Controller
             $lookupAmount = (int) ($lookup['total_amount'] ?? 0);
             $lookupStatus = (string) ($lookup['status'] ?? '');
 
-            if (in_array($lookupStatus, ['Pending', 'Initiated'], true)) {
-                $payment->update([
-                    'status' => BookingPaymentStatus::PENDING,
-                    'lookup_payload' => $lookup,
-                    'verified_at' => now(),
-                ]);
-
-                return [
-                    'success' => false,
-                    'message' => 'Khalti payment is pending. Please wait for final confirmation.',
-                    'booking' => $payment->booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment', 'latestSettlement']),
-                    'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
-                    'settlement' => $payment->settlement,
-                    'lookup' => $lookup,
-                ];
-            }
-
             if (in_array($lookupStatus, ['User canceled', 'Expired', 'Refunded'], true)) {
                 $failedStatus = match ($lookupStatus) {
                     'User canceled' => BookingPaymentStatus::CANCELED,
@@ -132,6 +117,23 @@ class KhaltiPaymentController extends Controller
                 return [
                     'success' => false,
                     'message' => 'Khalti payment was not completed.',
+                    'booking' => $payment->booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment', 'latestSettlement']),
+                    'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
+                    'settlement' => $payment->settlement,
+                    'lookup' => $lookup,
+                ];
+            }
+
+            if (in_array($lookupStatus, ['Pending', 'Initiated'], true)) {
+                $payment->update([
+                    'status' => BookingPaymentStatus::PENDING,
+                    'lookup_payload' => $lookup,
+                    'verified_at' => now(),
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Khalti payment is pending. Please wait for final confirmation.',
                     'booking' => $payment->booking->load(['vehicle', 'customer:id,name', 'vendor:id,name', 'latestPayment', 'latestSettlement']),
                     'payment' => $payment->fresh(['booking', 'customer', 'vendor', 'settlement']),
                     'settlement' => $payment->settlement,

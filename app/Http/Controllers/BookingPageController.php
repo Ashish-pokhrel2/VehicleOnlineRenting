@@ -40,16 +40,44 @@ class BookingPageController extends Controller
         if (! auth()->check()) {
             $errorMessage = 'Sign in to view your bookings.';
         } else {
-            
-$bookings = Bookings::with(['vehicle', 'vendor:id,name'])
-    ->where('customer_id', auth()->id())
-    ->latest()
-    ->get()
-    ->unique(function ($booking) {
-        return $booking->vehicle_id . '-' . ($booking->status->value ?? $booking->status);
-    })
-    ->values();
+            $initiatedPayments = BookingPayment::query()
+                ->where('customer_id', auth()->id())
+                ->where('status', BookingPaymentStatus::INITIATED)
+                ->get();
 
+            foreach ($initiatedPayments as $payment) {
+                try {
+                    $lookup = app(KhaltiPaymentService::class)->lookup($payment->pidx);
+                    $lookupStatus = (string) ($lookup['status'] ?? '');
+
+                    if (in_array($lookupStatus, ['User canceled', 'Expired', 'Refunded'], true)) {
+                        $failedStatus = match ($lookupStatus) {
+                            'User canceled' => BookingPaymentStatus::CANCELED,
+                            'Expired' => BookingPaymentStatus::EXPIRED,
+                            default => BookingPaymentStatus::REFUNDED,
+                        };
+
+                        $payment->update([
+                            'status' => $failedStatus,
+                            'lookup_payload' => $lookup,
+                            'verified_at' => now(),
+                        ]);
+
+                        $payment->booking->update(['status' => BookingStatus::CANCELLED]);
+                    }
+                } catch (RuntimeException) {
+                    // Khalti lookup failed, keep as initiated
+                }
+            }
+
+            $bookings = Bookings::with(['vehicle', 'vendor:id,name'])
+                ->where('customer_id', auth()->id())
+                ->latest()
+                ->get()
+                ->unique(function ($booking) {
+                    return $booking->vehicle_id.'-'.($booking->status->value ?? $booking->status);
+                })
+                ->values();
         }
 
         $statusClasses = [
